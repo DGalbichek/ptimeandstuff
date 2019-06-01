@@ -1,0 +1,48 @@
+{% extends "ptimebase.html" %}
+
+{% block ptimecontent %}
+
+
+  <form action="" method="post" name="enterdata">
+      {{ form.hidden_tag() }}
+
+      <table>
+	<tr>
+	  <td align="left">{{ form.game(size=1, class='medium') }}<br>
+	  {% for error in form.game.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+	</td></tr>
+
+	<tr><td><input type="submit" value="OK" class="larger"></td></tr>
+	</table>
+  </form>
+
+{% if tot %}<p class="medium" align="center">All time total {{(tot|last).time}}</p>{% endif %}
+
+<div>
+<table>
+{% for tl in tot[:-1] %}
+	<tr>
+	<td align="right" style="padding-right:8px">{{tl.rank}}</td>
+	<td align="left">{{tl.name}}</td>
+	<td align="right" style="padding-left:32px">{{tl.time}}</td>
+	<td align="left">{{tl.perc}}</td>
+	</tr>
+{% endfor %}
+</table>
+</br>
+</div>
+
+{% if mpt %}
+<div>
+<hr>
+    {% autoescape false %}
+        {{ mpt }}
+    {% endautoescape %}
+<hr>
+</div>
+{% endif %}
+
+{% for t in pt %}<p>{{t}}</p>{% endfor %}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div align="justify">
+{{ content }}
+</div>
+<hr>
+{% if prevp %}
+<a href="{{prevp}}" id="medium"><<</a>
+{% endif%}
+
+{% if nextp %}
+<a href="{{nextp}}" id="medium">>></a>
+{% endif%}
+
+{% endblock %}

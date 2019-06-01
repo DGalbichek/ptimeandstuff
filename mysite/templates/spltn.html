@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p id="medium">
+	{% for g in general %}
+	{{ g }}</br>
+	{% endfor %}
+</p>
+
+<p id="medium">
+	{% for b in battles %}
+	{{ b }}</br>
+	{% endfor %}
+</p>
+
+<p id="medium">
+	{% for q in queries %}
+	{{ q }}</br>
+	{% endfor %}
+</p>
+{% endblock %}

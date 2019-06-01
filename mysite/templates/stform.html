@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<!--<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>-->
+	<link rel="stylesheet" href="/static/jquery-ui.css">
+	<script src="/static/jquery-1.12.4.js"></script>
+	<script src="/static/jquery-ui.js"></script>
+	<script>
+		$(document).ready(
+			function() {
+				$( ".datepicker" ).datepicker({
+					dateFormat: "dd/mm/yy",
+					autoclose: true
+				});
+			});
+	</script>
+{% endblock %}
+
+{% block content %}
+<form action="" method="post" name="enterdata">
+{{ form.hidden_tag() }}
+
+	<table>
+		<tr>
+			<td class="medium" align="right">date:</td>
+			<td align="left">{{ form.sdate(size=12, class='larger datepicker', autocomplete='off') }}<br>
+				{% for error in form.sdate.errors %}
+					<span style="color: red;">[{{ error }}]</span>
+				{% endfor %}
+			</td>
+		</tr>
+
+		<tr>
+			<td class="medium" align="right">stime:</td>
+			<td align="left">{{ form.stime(size=12, class='larger', autocomplete='off') }}<br>
+				{% for error in form.stime.errors %}
+					<span style="color: red;">[{{ error }}]</span>
+				{% endfor %}
+			</td>
+		</tr>
+
+		<tr>
+			<td>
+				<input type="submit" value="OK" class="larger">
+			</td>
+		</tr>
+	</table>
+</form>
+{% endblock %}

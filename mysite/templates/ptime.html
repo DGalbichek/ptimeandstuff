@@ -1,0 +1,48 @@
+{% extends "ptimebase.html" %}
+
+{% block ptimecontent %}
+
+
+	{% for t in tops %}
+		<p class="medium">{{ t.title }}</p></br>
+		<table>
+		{% for tl in t.list %}
+			<tr>
+			<td align="right" style="padding-right:8px">{{tl.rank}}</td>
+			<td align="left">{{tl.name}}</td>
+			<td align="right" style="padding-left:32px">{{tl.time}}</td>
+			<td align="left">{{tl.perc}}</td>
+			</tr>
+		{% endfor %}
+		</table>
+		<br>
+	{% endfor %}
+
+
+<hr>
+<p class="medium">Monthly hours:</p>
+<div>
+    {% autoescape false %}
+        {{ mpt }}
+    {% endautoescape %}
+</div>
+<hr>
+
+
+<p class="medium">Tags:</p>
+{% for t in tags %}
+	<h1 align="left">{{t.rank}} [{{t.time}}] {{t.name}}</h1>
+
+	<table>
+	{% for tl in t.titles %}
+		<tr>
+		<td align="left">{{tl.name}}</td>
+		<td align="right" style="padding-left:32px">{{tl.time}}</td>
+		</tr>
+	{% endfor %}
+	</table>
+{% endfor %}
+
+
+
+{% endblock %}

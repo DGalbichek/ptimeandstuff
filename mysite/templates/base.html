@@ -1,0 +1,33 @@
+<html>
+	<head>
+		<title>{{ title }}</title>
+		<meta name="robots" content="noindex, nofollow">
+		<meta charset="utf-8">
+		<style media="screen" type="text/css">
+			.medium {
+			font-size: 30px;
+			}
+			.larger {
+			font-size: 40px;
+			}
+		</style>
+		{% block head %}{% endblock %}
+	</head>
+
+	<body>
+		<center>
+		<div style="width: 90%; max-width:640px">
+			<div class="larger">{{ title }}<!--<a href="/index">ind</a>--></div>
+			<hr>
+
+			{% if msg %}
+			{% for ms in msg %}
+			<p class="medium">{{ ms }}</p>
+			{% endfor %}
+			<hr>
+			{% endif%}
+			{% block content %}{% endblock %}
+		</div>
+		</center>
+	</body>
+</html>

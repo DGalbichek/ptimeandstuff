@@ -1,0 +1,15 @@
+{% extends "ptimebase.html" %}
+
+{% block ptimecontent %}
+
+{% if bal %}
+<div>
+    {% autoescape false %}
+        {{ bal }}
+    {% endautoescape %}
+<hr>
+</div>
+{% endif %}
+
+
+{% endblock %}

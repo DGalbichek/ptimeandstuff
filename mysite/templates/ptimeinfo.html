@@ -1,0 +1,16 @@
+{% extends "ptimebase.html" %}
+
+{% block ptimecontent %}
+
+{% for t in pt %}<p>{{t}}</p>{% endfor %}
+
+<p class="medium">All titles:</p>
+<ul>{% for g in games %}<li>{{g}}</li>{% endfor %}</ul>
+
+<p class="medium">All platforms:</p>
+<ul>{% for p in platforms %}<li>{{p}}</li>{% endfor %}</ul>
+
+<p class="medium">All tags:</p>
+<ul>{% for t in tags %}<li>{{t}}</li>{% endfor %}</ul>
+
+{% endblock %}
