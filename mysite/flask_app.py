@@ -164,22 +164,20 @@ def ptimepage():
     l4=m(10,ptdb.top(what='platform',what2={'months':'0'}),False)
     l5=m(20,ptdb.top(what2={}))
     l6=m(10,ptdb.top(what='platform',what2={}),False)
+    l7=m(20,ptdb.top(what2={'impressions':''}),False)
     now=datetime.datetime.now()
     curryear=now.strftime('%Y')
 
-    tops=[{'title':'Top '+str(len(l1)-1)+' games in '+curryear,
-          'list': l1},
-         {'title':'Top '+str(len(l2)-1)+' games in '+now.strftime('%B')+' '+curryear,
-          'list': l2},
-         {'title':'Top '+str(len(l3))+' platforms in '+curryear,
-          'list': l3},
-         {'title':'Top '+str(len(l4))+' platforms in '+now.strftime('%B')+' '+curryear,
-          'list': l4},
-         {'title':'Top '+str(len(l5)-1)+' games of all time (well, 2017-)',
-          'list': l5},
-         {'title':'Top '+str(len(l6))+' platforms of all time (well, 2017-)',
-          'list': l6},
-          ]
+    tops=[
+        {'title':'Top '+str(len(l2)-1)+' games in '+now.strftime('%B')+' '+curryear, 'list': l2},
+        {'title':'Top '+str(len(l4))+' platforms in '+now.strftime('%B')+' '+curryear, 'list': l4},
+        {'title':'Top '+str(len(l1)-1)+' games in '+curryear, 'list': l1},
+        {'title':'Top '+str(len(l3))+' platforms in '+curryear, 'list': l3},
+        {'title':'Top '+str(len(l7))+' impressions of all time (well, 2017-)', 'list': l7},
+        {'title':'Top '+str(len(l5)-1)+' games of all time (well, 2017-)', 'list': l5},
+        {'title':'Top '+str(len(l6))+' platforms of all time (well, 2017-)', 'list': l6},
+        ]
+
     tags=ptdb.toptags()
     ptdb.db.close()
     return render_template('ptime.html',

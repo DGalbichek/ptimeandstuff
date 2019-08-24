@@ -64,12 +64,7 @@ class PTimeDb():
 
 
     def _hm(self,t,sep=' '):
-        if t<0:
-            r='- '
-            t=abs(t)
-        else:
-            r=''
-        return r+str(int(t/60))+'h'+sep+str(int(t)%60)+'m'
+        return str(int(t/60))+'h'+sep+str(int(t)%60)+'m'
 
 
     def _iym(self,ym):
@@ -175,8 +170,6 @@ class PTimeDb():
                 music[gt[1]]+=gt[0]
 
         boardgames={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Board Game','aggr':'monthly','years':0})}
-        learning={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Learning','aggr':'monthly','years':0})}
-        exercise={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Exercise','aggr':'monthly','years':0})}
 
         allgames={x[1]:x[0] for x in self.list('playtime',what2={'aggr':'monthly','years':0})}
 
@@ -186,7 +179,7 @@ class PTimeDb():
         highlights={'month':{},'year':{}}
 
         # months with data buildup
-        for m in ['balance','ratio','music','daily music','vg','bg','learn','exercise','total',]:
+        for m in ['balance','ratio','music','daily music','vg','bg','total',]:
             # row title
             bal+="<tr><td><b>"+m+"</b></td>"
 
@@ -194,18 +187,16 @@ class PTimeDb():
             for ym in ymonths:
                 mus=music.get(ym,0)
                 boa=boardgames.get(ym,0)
-                lea=learning.get(ym,0)
-                exe=exercise.get(ym,0)
                 tot=allgames.get(ym,0)
-                vid=tot-mus-boa-lea-exe
+                vid=tot-mus-boa
 
                 if m=='balance':
-                    ts.append((mus+lea+exe)-vid)
+                    ts.append(mus-vid)
                 elif m=='ratio':
                     if vid==0:
                         ts.append(0)
                     else:
-                        ts.append((mus+lea+exe)/vid)
+                        ts.append(mus/vid)
                 elif m=='music':
                     ts.append(mus)
                 elif m=='daily music':
@@ -217,15 +208,10 @@ class PTimeDb():
                     ts.append(vid)
                 elif m=='bg':
                     ts.append(boa)
-                elif m=='learn':
-                    ts.append(lea)
-                elif m=='exercise':
-                    ts.append(exe)
                 elif m=='total':
                     ts.append(tot)
                 else:
                     pass
-
             if m=='balance' or m=='ratio':
                 highlights['month'][m]=ts[-1]
                 if m=='ratio' and len(ts)>1:
@@ -248,8 +234,7 @@ class PTimeDb():
                 ts.append(0)
 
             if m=='ratio':
-                work=sum([music.get(ym,0) for ym in ymonths])+sum([learning.get(ym,0) for ym in ymonths])+sum([exercise.get(ym,0) for ym in ymonths])
-                rr=work/(sum([allgames.get(ym,0) for ym in ymonths])-sum([boardgames.get(ym,0) for ym in ymonths])-work)
+                rr=sum([music.get(ym,0) for ym in ymonths])/(sum([allgames.get(ym,0) for ym in ymonths])-sum([boardgames.get(ym,0) for ym in ymonths])-sum([music.get(ym,0) for ym in ymonths]))
                 ts.append(rr)
                 highlights['year'][m]=ts[-1]
             elif m=='daily music':
@@ -257,7 +242,7 @@ class PTimeDb():
             else:
                 ts.append(ctot)
                 if m=='balance':
-                    highlights['year']['balance']=ts[-1]
+                    highlights['year'][m]=ts[-1]
             ts.append(cavg)
 
             # month cells
@@ -274,15 +259,16 @@ class PTimeDb():
                     bal+="{0:.2f}".format(t)
                 elif m=='daily music' and t>0:
                     bal+=str(int(t))+'m'
-                elif t!=0:
+                elif t>0:
                     bal+=self._hm(t,sep='<br>')
+                elif t<0:
+                    bal+='- '+self._hm(abs(t),sep='<br>')
                 bal+="</td>"
             bal+='</tr>'
         bal+='</tbody></table>'
-
         high='<h1>curr month: <font style="background:'
         high+='red' if highlights['month']['ratio']<BALANCERATIO else 'lightgreen'
-        high+=';">'+self._hm(highlights['month']['balance'], sep=' ')
+        high+=';">'+('- ' if highlights['month']['balance']<0 else '')+self._hm(abs(highlights['month']['balance']), sep=' ')
         high+=' ('+"{0:.2f}".format(highlights['month']['ratio'])+')</font>'
         if 'dynamics' in highlights['month']:
             high+='<font style="background:'+highlights['month']['dynamics'][0]+';"> '
@@ -463,6 +449,65 @@ class PTimeDb():
 
 
     def top(self,what='game',what2={'years':'0'}):
+        items=[x[0] for x in self.list(what,{'game':what2['game']} if 'game' in what2 else {})]
+        if what=='game' and 'gameperplatform' in what2:
+            allplatforms=[x[0] for x in self.list('platform')]
+        else:
+            allplatforms=[]
+        itemswtimes=[]
+        for x in items:
+            wh=what2
+            wh[what]=x
+            ipts=[]
+            if allplatforms:
+                for p in allplatforms:
+                    wh['platform']=p
+                    ipts.append([p,self.list('playtime',wh)])
+            else:
+                ipts.append(['',self.list('playtime',wh)])
+
+            if 'impressions' in what2:
+                for ipt in ipts:
+                    t={}
+                    for i in ipt[1]:
+                        ym=i[3][:7]
+                        if ym in t:
+                            t[ym]+=i[6]
+                        else:
+                            t[ym]=i[6]
+                    if t:
+                        for k in t.keys():
+                            itemswtimes.append([x,t[k],k])
+            else:
+                for ipt in ipts:
+                    t=0
+                    for i in ipt[1]:
+                        if i[7]==1:
+                            pass
+                            #sp=self.cursor.execute('SELECT startofplay FROM games WHERE id=(?);',(str(i[1]))).fetchone()[0]
+                            #print(sp)
+                            #t+=0
+                        else:
+                            t+=i[6]
+                #t=ipt
+                #print([x,t])
+                    if t>0:
+                        if allplatforms:
+                            itemswtimes.append([x+' ('+ipt[0]+')',t])
+                        else:
+                            itemswtimes.append([x,t])
+
+        itemswtimes.sort(key=lambda x:x[1], reverse=True)
+        tt=sum([x[1] for x in itemswtimes])
+        if 'impressions' in what2:
+            r=[{'rank':str(n+1),'name':x[0],'time':str(int(x[1]/60))+'h '+str(x[1]%60)+'m','yearmonth':x[2]} for n,x in enumerate(itemswtimes)]
+        else:
+            r=[{'rank':str(n+1),'name':x[0],'time':str(int(x[1]/60))+'h '+str(x[1]%60)+'m','perc':'('+str(int(x[1]/tt*100))+'%)'} for n,x in enumerate(itemswtimes)]
+        r.append({'rank':'Total','name':'','time':str(int(tt/60))+'h '+str(tt%60)+'m','perc':''})
+        return r
+
+
+    def impressions(self,what='game',what2={'years':'0'}):
         items=[x[0] for x in self.list(what,{'game':what2['game']} if 'game' in what2 else {})]
         if what=='game' and 'gameperplatform' in what2:
             allplatforms=[x[0] for x in self.list('platform')]
