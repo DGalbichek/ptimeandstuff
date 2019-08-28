@@ -170,6 +170,8 @@ class PTimeDb():
                 music[gt[1]]+=gt[0]
 
         boardgames={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Board Game','aggr':'monthly','years':0})}
+        learning={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Learning','aggr':'monthly','years':0})}
+        exercise={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Exercise','aggr':'monthly','years':0})}
 
         allgames={x[1]:x[0] for x in self.list('playtime',what2={'aggr':'monthly','years':0})}
 
@@ -179,7 +181,7 @@ class PTimeDb():
         highlights={'month':{},'year':{}}
 
         # months with data buildup
-        for m in ['balance','ratio','music','daily music','vg','bg','total',]:
+        for m in ['balance','ratio','music','daily music','vg','bg','learn','exercise','total',]:
             # row title
             bal+="<tr><td><b>"+m+"</b></td>"
 
@@ -187,16 +189,18 @@ class PTimeDb():
             for ym in ymonths:
                 mus=music.get(ym,0)
                 boa=boardgames.get(ym,0)
+                lea=learning.get(ym,0)
+                exe=exercise.get(ym,0)
                 tot=allgames.get(ym,0)
-                vid=tot-mus-boa
+                vid=tot-mus-boa-lea-exe
 
                 if m=='balance':
-                    ts.append(mus-vid)
+                    ts.append((mus+lea+exe)-vid)
                 elif m=='ratio':
                     if vid==0:
                         ts.append(0)
                     else:
-                        ts.append(mus/vid)
+                        ts.append((mus+lea+exe)/vid)
                 elif m=='music':
                     ts.append(mus)
                 elif m=='daily music':
@@ -208,10 +212,15 @@ class PTimeDb():
                     ts.append(vid)
                 elif m=='bg':
                     ts.append(boa)
+                elif m=='learn':
+                    ts.append(lea)
+                elif m=='exercise':
+                    ts.append(exe)
                 elif m=='total':
                     ts.append(tot)
                 else:
                     pass
+
             if m=='balance' or m=='ratio':
                 highlights['month'][m]=ts[-1]
                 if m=='ratio' and len(ts)>1:
@@ -234,7 +243,8 @@ class PTimeDb():
                 ts.append(0)
 
             if m=='ratio':
-                rr=sum([music.get(ym,0) for ym in ymonths])/(sum([allgames.get(ym,0) for ym in ymonths])-sum([boardgames.get(ym,0) for ym in ymonths])-sum([music.get(ym,0) for ym in ymonths]))
+                work=sum([music.get(ym,0) for ym in ymonths])+sum([learning.get(ym,0) for ym in ymonths])+sum([exercise.get(ym,0) for ym in ymonths])
+                rr=work/(sum([allgames.get(ym,0) for ym in ymonths])-sum([boardgames.get(ym,0) for ym in ymonths])-work)
                 ts.append(rr)
                 highlights['year'][m]=ts[-1]
             elif m=='daily music':
@@ -242,7 +252,7 @@ class PTimeDb():
             else:
                 ts.append(ctot)
                 if m=='balance':
-                    highlights['year'][m]=ts[-1]
+                    highlights['year']['balance']=ts[-1]
             ts.append(cavg)
 
             # month cells
@@ -259,16 +269,15 @@ class PTimeDb():
                     bal+="{0:.2f}".format(t)
                 elif m=='daily music' and t>0:
                     bal+=str(int(t))+'m'
-                elif t>0:
+                elif t!=0:
                     bal+=self._hm(t,sep='<br>')
-                elif t<0:
-                    bal+='- '+self._hm(abs(t),sep='<br>')
                 bal+="</td>"
             bal+='</tr>'
         bal+='</tbody></table>'
+
         high='<h1>curr month: <font style="background:'
         high+='red' if highlights['month']['ratio']<BALANCERATIO else 'lightgreen'
-        high+=';">'+('- ' if highlights['month']['balance']<0 else '')+self._hm(abs(highlights['month']['balance']), sep=' ')
+        high+=';">'+self._hm(highlights['month']['balance'], sep=' ')
         high+=' ('+"{0:.2f}".format(highlights['month']['ratio'])+')</font>'
         if 'dynamics' in highlights['month']:
             high+='<font style="background:'+highlights['month']['dynamics'][0]+';"> '
