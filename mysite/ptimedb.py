@@ -64,7 +64,7 @@ class PTimeDb():
 
 
     def _hm(self,t,sep=' '):
-        return str(int(t/60))+'h'+sep+str(int(t)%60)+'m'
+        return ('-' if t<0 else '') + str(int(abs(t)/60))+'h'+sep+str(int(abs(t))%60)+'m'
 
 
     def _iym(self,ym):
