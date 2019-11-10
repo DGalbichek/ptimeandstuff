@@ -159,137 +159,159 @@ class PTimeDb():
         return mpt
 
 
-    def balance(self):
-        thismonth=datetime.datetime.now().strftime('%Y-%m')
-
-        ymonths=[x for x in [datetime.datetime.now().strftime('%Y-')+str(y).zfill(2) for y in range(1,13)] if x<=thismonth]
+    def _balance_gather(self,bal_year='this year'):
+        print(bal_year)
+        if bal_year=='this year':
+            thismonth=datetime.datetime.now().strftime('%Y-%m')
+            bal_year=thismonth[:4]
+        else:
+            bal_year=str(datetime.datetime.now().year-1)
+            thismonth=bal_year+'-12'
+        yearsback=datetime.datetime.now().year-int(bal_year)
+    
+        ymonths=[x for x in [bal_year+'-'+str(y).zfill(2) for y in range(1,13)] if x<=thismonth]
 
         music={x:0 for x in ymonths}
         for mg in self.tagged_as('Music')['game']:
-            for gt in self.list('playtime',what2={'game':mg,'aggr':'monthly','years':0}):
-                music[gt[1]]+=gt[0]
+            for gt in self.list('playtime',what2={'game':mg,'aggr':'monthly','years':yearsback}):
+                if gt[1] in music.keys():
+                    music[gt[1]]+=gt[0]
 
-        boardgames={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Board Game','aggr':'monthly','years':0})}
-        learning={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Learning','aggr':'monthly','years':0})}
-        exercise={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Exercise','aggr':'monthly','years':0})}
+        boardgames={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Board Game','aggr':'monthly','years':yearsback}) if bal_year in x[1]}
+        learning={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Learning','aggr':'monthly','years':yearsback}) if bal_year in x[1]}
+        exercise={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Exercise','aggr':'monthly','years':yearsback}) if bal_year in x[1]}
 
-        allgames={x[1]:x[0] for x in self.list('playtime',what2={'aggr':'monthly','years':0})}
+        allgames={x[1]:x[0] for x in self.list('playtime',what2={'aggr':'monthly','years':yearsback}) if bal_year in x[1]}
 
-        ## TABLE
-        # header
-        bal="<table><tbody><tr><th></th>"+''.join(['<th>'+str(n)+'</th>' for n in range(1,13)])+"<th>total</th><th>avg</th></tr>"
-        highlights={'month':{},'year':{}}
+        return ymonths, music, boardgames, learning, exercise, allgames
 
-        # months with data buildup
-        for m in ['balance','ratio','music','daily music','vg','bg','learn','exercise','total',]:
-            # row title
-            bal+="<tr><td><b>"+m+"</b></td>"
+        
+    def balance(self):
+        bal=''
+        for bal_year in ['this year', 'last year',]:
+            ymonths, music, boardgames, learning, exercise, allgames = self._balance_gather(bal_year=bal_year)
+            ## TABLE
+            # header
+            bal+="<h1>"+bal_year+"</h1>"
+            bal+="<table><tbody><tr><th></th>"+''.join(['<th>'+str(n)+'</th>' for n in range(1,13)])+"<th>total</th><th>avg</th></tr>"
+            highlights={'month':{},'year':{}}
 
-            ts=[]
-            for ym in ymonths:
-                mus=music.get(ym,0)
-                boa=boardgames.get(ym,0)
-                lea=learning.get(ym,0)
-                exe=exercise.get(ym,0)
-                tot=allgames.get(ym,0)
-                vid=tot-mus-boa-lea-exe
+            # months with data buildup
+            for m in ['balance','ratio','music','daily music','vg','bg','learn','exercise','total',]:
+                # row title
+                bal+="<tr><td><b>"+m+"</b></td>"
 
-                if m=='balance':
-                    ts.append((mus+lea+exe)-vid)
-                elif m=='ratio':
-                    if vid==0:
-                        ts.append(0)
+                ts=[]
+                for ym in ymonths:
+                    mus=music.get(ym,0)
+                    boa=boardgames.get(ym,0)
+                    lea=learning.get(ym,0)
+                    exe=exercise.get(ym,0)
+                    tot=allgames.get(ym,0)
+                    vid=tot-mus-boa-lea-exe
+
+                    if m=='balance':
+                        ts.append((mus+lea+exe)-vid)
+                    elif m=='ratio':
+                        if vid==0:
+                            ts.append(0)
+                        else:
+                            ts.append((mus+lea+exe)/vid)
+                    elif m=='music':
+                        ts.append(mus)
+                    elif m=='daily music':
+                        if ym==ymonths[-1]:
+                            ts.append(mus/datetime.datetime.now().day)
+                        else:
+                            ts.append(mus/monthrange(int(ym[:4]),int(ym[-2:]))[1])
+                    elif m=='vg':
+                        ts.append(vid)
+                    elif m=='bg':
+                        ts.append(boa)
+                    elif m=='learn':
+                        ts.append(lea)
+                    elif m=='exercise':
+                        ts.append(exe)
+                    elif m=='total':
+                        ts.append(tot)
                     else:
-                        ts.append((mus+lea+exe)/vid)
-                elif m=='music':
-                    ts.append(mus)
+                        pass
+
+                if m=='balance' or m=='ratio':
+                    highlights['month'][m]=ts[-1]
+                    if m=='ratio' and len(ts)>1:
+                        rank=' #'+str(len([x for x in ts[:-1] if x>ts[-1]])+1)
+                        highlights['month']['rank']=rank
+                        if ts[-1]>=max(ts[:-1]):
+                            highlights['month']['dynamics']=('yellow',':)')#highest
+                        elif ts[-1]>ts[-2]:
+                            highlights['month']['dynamics']=('green','++') #higher
+                        elif ts[-1]<ts[-2]:
+                            highlights['month']['dynamics']=('red','--') #lower
+                        else:
+                            highlights['month']['dynamics']=('lightgrey','==') #same
+
+                ctot=sum(ts)
+                cavg=ctot/len(ts)
+
+                #yearfill
+                for a in range(12-len(ts)):
+                    ts.append(0)
+
+                if m=='ratio':
+                    work=sum([music.get(ym,0) for ym in ymonths])+sum([learning.get(ym,0) for ym in ymonths])+sum([exercise.get(ym,0) for ym in ymonths])
+                    try:
+                        rr=work/(sum([allgames.get(ym,0) for ym in ymonths])-sum([boardgames.get(ym,0) for ym in ymonths])-work)
+                    except:
+                        rr=0
+                    ts.append(rr)
+                    highlights['year'][m]=ts[-1]
                 elif m=='daily music':
-                    if ym==ymonths[-1]:
-                        ts.append(mus/datetime.datetime.now().day)
-                    else:
-                        ts.append(mus/monthrange(int(ym[:4]),int(ym[-2:]))[1])
-                elif m=='vg':
-                    ts.append(vid)
-                elif m=='bg':
-                    ts.append(boa)
-                elif m=='learn':
-                    ts.append(lea)
-                elif m=='exercise':
-                    ts.append(exe)
-                elif m=='total':
-                    ts.append(tot)
+                    ts.append(sum([music.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
                 else:
-                    pass
+                    ts.append(ctot)
+                    if m=='balance':
+                        highlights['year']['balance']=ts[-1]
+                ts.append(cavg)
 
-            if m=='balance' or m=='ratio':
-                highlights['month'][m]=ts[-1]
-                if m=='ratio' and len(ts)>1:
-                    rank=' #'+str(len([x for x in ts[:-1] if x>ts[-1]])+1)
-                    highlights['month']['rank']=rank
-                    if ts[-1]>=max(ts[:-1]):
-                        highlights['month']['dynamics']=('yellow',':)')#highest
-                    elif ts[-1]>ts[-2]:
-                        highlights['month']['dynamics']=('green','++') #higher
-                    elif ts[-1]<ts[-2]:
-                        highlights['month']['dynamics']=('red','--') #lower
-                    else:
-                        highlights['month']['dynamics']=('lightgrey','==') #same
+                # month cells
+                for nn,t in enumerate(ts):
+                    bal+='<td align="right"'
+                    if (m=='balance' and t<0) or (m=='ratio' and t<BALANCERATIO and t>0):
+                        bal+=' style="background:red;"'
+                    elif (m=='balance' and t>0) or (m=='ratio' and t>=BALANCERATIO):
+                        bal+=' style="background:lightgreen;"'
+                    elif nn<12 and t!=0 and t>=cavg:
+                        bal+=' style="background:lightblue;"'
+                    bal+='>'
+                    if m=='ratio' and t>0:
+                        bal+="{0:.2f}".format(t)
+                    elif m=='daily music' and t>0:
+                        bal+=str(int(t))+'m'
+                    elif t!=0:
+                        bal+=self._hm(t,sep='<br>')
+                    bal+="</td>"
+                bal+='</tr>'
+            bal+='</tbody></table>'
 
-            ctot=sum(ts)
-            cavg=ctot/len(ts)
+            if bal_year == 'this year':
+                high='<h1>curr month: <font style="background:'
+                high+='red' if highlights['month']['ratio']<BALANCERATIO else 'lightgreen'
+                high+=';">'+self._hm(highlights['month']['balance'], sep=' ')
+                high+=' ('+"{0:.2f}".format(highlights['month']['ratio'])+')</font>'
+                if 'dynamics' in highlights['month']:
+                    high+='<font style="background:'+highlights['month']['dynamics'][0]+';"> '
+                    high+=highlights['month']['dynamics'][1]
+                    if 'rank' in highlights['month']:
+                        high+=highlights['month']['rank']
+                    high+='</font>'
+                high+='</h1><h1>this year: <font style="background:'
+                high+='red' if highlights['year']['ratio']<BALANCERATIO else 'lightgreen'
+                high+=';">'+self._hm(highlights['year']['balance'], sep=' ')
+                high+=' ('+"{0:.2f}".format(highlights['year']['ratio'])+')</font></h1>'
+                high+='<h1>target: '+"{0:.2f}".format(BALANCERATIO)+'</h1><hr>'
 
-            #yearfill
-            for a in range(12-len(ts)):
-                ts.append(0)
 
-            if m=='ratio':
-                work=sum([music.get(ym,0) for ym in ymonths])+sum([learning.get(ym,0) for ym in ymonths])+sum([exercise.get(ym,0) for ym in ymonths])
-                rr=work/(sum([allgames.get(ym,0) for ym in ymonths])-sum([boardgames.get(ym,0) for ym in ymonths])-work)
-                ts.append(rr)
-                highlights['year'][m]=ts[-1]
-            elif m=='daily music':
-                ts.append(sum([music.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
-            else:
-                ts.append(ctot)
-                if m=='balance':
-                    highlights['year']['balance']=ts[-1]
-            ts.append(cavg)
-
-            # month cells
-            for nn,t in enumerate(ts):
-                bal+='<td align="right"'
-                if (m=='balance' and t<0) or (m=='ratio' and t<BALANCERATIO and t>0):
-                    bal+=' style="background:red;"'
-                elif (m=='balance' and t>0) or (m=='ratio' and t>=BALANCERATIO):
-                    bal+=' style="background:lightgreen;"'
-                elif nn<12 and t!=0 and t>=cavg:
-                    bal+=' style="background:lightblue;"'
-                bal+='>'
-                if m=='ratio' and t>0:
-                    bal+="{0:.2f}".format(t)
-                elif m=='daily music' and t>0:
-                    bal+=str(int(t))+'m'
-                elif t!=0:
-                    bal+=self._hm(t,sep='<br>')
-                bal+="</td>"
-            bal+='</tr>'
-        bal+='</tbody></table>'
-
-        high='<h1>curr month: <font style="background:'
-        high+='red' if highlights['month']['ratio']<BALANCERATIO else 'lightgreen'
-        high+=';">'+self._hm(highlights['month']['balance'], sep=' ')
-        high+=' ('+"{0:.2f}".format(highlights['month']['ratio'])+')</font>'
-        if 'dynamics' in highlights['month']:
-            high+='<font style="background:'+highlights['month']['dynamics'][0]+';"> '
-            high+=highlights['month']['dynamics'][1]
-            if 'rank' in highlights['month']:
-                high+=highlights['month']['rank']
-            high+='</font>'
-        high+='</h1><h1>this year: <font style="background:'
-        high+='red' if highlights['year']['ratio']<BALANCERATIO else 'lightgreen'
-        high+=';">'+self._hm(highlights['year']['balance'], sep=' ')
-        high+=' ('+"{0:.2f}".format(highlights['year']['ratio'])+')</font></h1>'
-        high+='<h1>target: '+"{0:.2f}".format(BALANCERATIO)+'</h1><hr>'
         return high+bal
 
 
