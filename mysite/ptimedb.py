@@ -160,7 +160,7 @@ class PTimeDb():
 
 
     def _balance_gather(self,bal_year='this year'):
-        print(bal_year)
+        #print(bal_year)
         if bal_year=='this year':
             thismonth=datetime.datetime.now().strftime('%Y-%m')
             bal_year=thismonth[:4]
@@ -220,7 +220,7 @@ class PTimeDb():
                     elif m=='music':
                         ts.append(mus)
                     elif m=='daily music':
-                        if ym==ymonths[-1]:
+                        if bal_year=='this year' and ym==ymonths[-1]:
                             ts.append(mus/datetime.datetime.now().day)
                         else:
                             ts.append(mus/monthrange(int(ym[:4]),int(ym[-2:]))[1])
