@@ -214,7 +214,10 @@ class PTimeDb():
                         ts.append((mus+lea+exe)-vid)
                     elif m=='ratio':
                         if vid==0:
-                            ts.append(0)
+                            if mus+lea+exe > 0:
+                                ts.append(2)
+                            else:
+                                ts.append(0)
                         else:
                             ts.append((mus+lea+exe)/vid)
                     elif m=='music':
