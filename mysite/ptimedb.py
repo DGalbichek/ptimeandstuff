@@ -7,7 +7,7 @@ import sqlite3
 
 
 WHAT = {'game':'games','platform':'platforms','tag':'tags'}
-BALANCERATIO = 0.8
+BALANCERATIO = 0.5
 
 
 class PTimeDb():
@@ -211,7 +211,7 @@ class PTimeDb():
                     vid=tot-mus-boa-lea-exe
 
                     if m=='balance':
-                        ts.append((mus+lea+exe)-vid)
+                        ts.append((mus+lea+exe)/BALANCERATIO-vid)
                     elif m=='ratio':
                         if vid==0:
                             if mus+lea+exe > 0:
@@ -313,7 +313,6 @@ class PTimeDb():
                 high+=';">'+self._hm(highlights['year']['balance'], sep=' ')
                 high+=' ('+"{0:.2f}".format(highlights['year']['ratio'])+')</font></h1>'
                 high+='<h1>target: '+"{0:.2f}".format(BALANCERATIO)+'</h1><hr>'
-
 
         return high+bal
 
