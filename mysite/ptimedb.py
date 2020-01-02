@@ -270,7 +270,10 @@ class PTimeDb():
                     ts.append(rr)
                     highlights['year'][m]=ts[-1]
                 elif m=='daily music':
-                    ts.append(sum([music.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
+                    if bal_year=='this year':
+                        ts.append(sum([music.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
+                    else:
+                        ts.append(sum([music.get(ym,0) for ym in ymonths])/365)
                 else:
                     ts.append(ctot)
                     if m=='balance':
