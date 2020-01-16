@@ -75,10 +75,7 @@ class PTimeDb():
 
 
     def monthly_table(self,mtaim):
-        print(mtaim, flush=True)
         mtaim.sort(key=lambda x:x[1])
-        #avg=[x[0] for x in mtaim]
-        #avg=sum(avg)/len(avg) if len(avg)>0 else 0
         if len(mtaim)>0:
             mt=[mtaim[0],]
             # fill holes with 0
@@ -580,7 +577,6 @@ class PTimeDb():
                         itemswtimes.append([x,t])
         itemswtimes.sort(key=lambda x:x[1], reverse=True)
         tt=sum([x[1] for x in itemswtimes])
-        print(tt)
         r=[{'rank':str(n+1),'name':x[0],'time':str(int(x[1]/60))+'h '+str(x[1]%60)+'m','perc':'('+str(int(x[1]/tt*100))+'%)'} for n,x in enumerate(itemswtimes)]
         r.append({'rank':'Total','name':'','time':str(int(tt/60))+'h '+str(tt%60)+'m','perc':''})
         return r
@@ -609,7 +605,6 @@ class PTimeDb():
         r=[]
         for n,tt in enumerate(tagtimes):
             timstr=str(int(tt[1]/60))+'h '+str(tt[1]%60)+'m'
-            #timstr=' '*(12-len(timstr))+timstr
             r.append({'rank':str(n+1),'name':tt[0],'time':timstr,'titles':tt[2]})
         return r
 
