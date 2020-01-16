@@ -75,6 +75,7 @@ class PTimeDb():
 
 
     def monthly_table(self,mtaim):
+        print(mtaim, flush=True)
         mtaim.sort(key=lambda x:x[1])
         #avg=[x[0] for x in mtaim]
         #avg=sum(avg)/len(avg) if len(avg)>0 else 0
@@ -579,6 +580,7 @@ class PTimeDb():
                         itemswtimes.append([x,t])
         itemswtimes.sort(key=lambda x:x[1], reverse=True)
         tt=sum([x[1] for x in itemswtimes])
+        print(tt)
         r=[{'rank':str(n+1),'name':x[0],'time':str(int(x[1]/60))+'h '+str(x[1]%60)+'m','perc':'('+str(int(x[1]/tt*100))+'%)'} for n,x in enumerate(itemswtimes)]
         r.append({'rank':'Total','name':'','time':str(int(tt/60))+'h '+str(tt%60)+'m','perc':''})
         return r

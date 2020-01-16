@@ -1,0 +1,17 @@
+{% extends "ptimebase.html" %}
+
+{% block ptimecontent %}
+
+{% if tmpt %}
+    {% for x in tmpt %}
+    <p class="medium">{{x.0}}</p>
+    <div>
+    {% autoescape false %}
+        {{ x.1 }}
+    {% endautoescape %}
+    </div>
+    {% endfor %}
+{% endif %}
+<hr>
+
+{% endblock %}

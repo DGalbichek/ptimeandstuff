@@ -188,6 +188,31 @@ def ptimepage():
                            )
 
 
+@app.route("/ptime/tags", methods=['GET'])
+@app.route("/ptime/tags/", methods=['GET'])
+def tagspage():
+    ptdb=ptimedb.PTimeDb()
+    tmpt = []
+    for tag in ptdb.list('tag'):
+        ta=ptdb.tagged_as(tag[0])
+        ttaim = {}
+        for t in ta['game']:
+            for tt in ptdb.list('playtime',what2={'game':t,'aggr':'monthly'}):
+                if tt[1] in ttaim:
+                    ttaim[tt[1]]+=tt[0]
+                else:
+                    ttaim[tt[1]]=tt[0]
+            print(ptdb.nameof('game',t), flush=True)
+        ttaim=[(ttaim[x],x) for x in ttaim.keys()]
+        tmpt.append((tag[0],ptdb.monthly_table(ttaim)))
+
+    ptdb.db.close()
+    return render_template('ptimetags.html',
+                           title='ptime tags',
+                           tmpt=tmpt,
+                           )
+
+
 @app.route("/ptime/add", methods=['GET', 'POST'])
 @app.route("/ptime/add/", methods=['GET', 'POST'])
 def ptime_formadd(msg=[]):
