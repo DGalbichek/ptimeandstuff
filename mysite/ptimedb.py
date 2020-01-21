@@ -1,6 +1,7 @@
 from calendar import monthrange
 
 import datetime
+import itertools
 import json
 import os
 import sqlite3
@@ -489,9 +490,9 @@ class PTimeDb():
         else:
             allplatforms=[]
         itemswtimes=[]
-        for x in items:
+        for item in items:
             wh=what2
-            wh[what]=x
+            wh[what]=item
             ipts=[]
             if allplatforms:
                 for p in allplatforms:
@@ -501,6 +502,17 @@ class PTimeDb():
                 ipts.append(['',self.list('playtime',wh)])
 
             if 'impressions' in what2:
+                def consecu(x):
+                    aa=[int(y) for y in x[0].split('-')]
+                    bb=[int(y) for y in x[1].split('-')]
+                    if aa[0]>bb[0] or (aa[0]==bb[0] and aa[1]>bb[1]):
+                        cc=list(bb)
+                        bb=list(aa)
+                        aa=list(cc)
+                    if (aa[0]==bb[0] and bb[1]-aa[1]==1) or (aa[0]+1==bb[0] and aa[1]==12 and bb[1]==1):
+                        return ['-'.join([str(a).zfill(2) for a in aa]), '-'.join([str(b).zfill(2) for b in bb])]
+                    else:
+                        return []
                 for ipt in ipts:
                     t={}
                     for i in ipt[1]:
@@ -510,8 +522,23 @@ class PTimeDb():
                         else:
                             t[ym]=i[6]
                     if t:
-                        for k in t.keys():
-                            itemswtimes.append([x,t[k],k])
+                        tt={}
+                        monthpot = list(t.keys())
+                        while monthpot:
+                            pairs = [consecu(x) for x in itertools.combinations(monthpot, 2) if consecu(x)]
+                            if pairs:
+                                times = [t[x[0]]+t[x[1]] for x in pairs]
+                                maksz = times.index(max(times))
+                                tt['+'.join(pairs[maksz])] = times[maksz]
+                                for x in pairs[maksz]:
+                                    monthpot.pop(monthpot.index(x))
+                            else:
+                                for x in monthpot:
+                                    itemswtimes.append([item,t[x],x])
+                                break
+                        for k in tt.keys():
+                            itemswtimes.append([item,tt[k],k])
+                #print(itemswtimes, flush=True)
             else:
                 for ipt in ipts:
                     t=0
@@ -527,9 +554,9 @@ class PTimeDb():
                 #print([x,t])
                     if t>0:
                         if allplatforms:
-                            itemswtimes.append([x+' ('+ipt[0]+')',t])
+                            itemswtimes.append([item+' ('+ipt[0]+')',t])
                         else:
-                            itemswtimes.append([x,t])
+                            itemswtimes.append([item,t])
 
         itemswtimes.sort(key=lambda x:x[1], reverse=True)
         tt=sum([x[1] for x in itemswtimes])
@@ -537,47 +564,6 @@ class PTimeDb():
             r=[{'rank':str(n+1),'name':x[0],'time':str(int(x[1]/60))+'h '+str(x[1]%60)+'m','yearmonth':x[2]} for n,x in enumerate(itemswtimes)]
         else:
             r=[{'rank':str(n+1),'name':x[0],'time':str(int(x[1]/60))+'h '+str(x[1]%60)+'m','perc':'('+str(int(x[1]/tt*100))+'%)'} for n,x in enumerate(itemswtimes)]
-        r.append({'rank':'Total','name':'','time':str(int(tt/60))+'h '+str(tt%60)+'m','perc':''})
-        return r
-
-
-    def impressions(self,what='game',what2={'years':'0'}):
-        items=[x[0] for x in self.list(what,{'game':what2['game']} if 'game' in what2 else {})]
-        if what=='game' and 'gameperplatform' in what2:
-            allplatforms=[x[0] for x in self.list('platform')]
-        else:
-            allplatforms=[]
-        itemswtimes=[]
-        for x in items:
-            wh=what2
-            wh[what]=x
-            ipts=[]
-            if allplatforms:
-                for p in allplatforms:
-                    wh['platform']=p
-                    ipts.append([p,self.list('playtime',wh)])
-            else:
-                ipts.append(['',self.list('playtime',wh)])
-            for ipt in ipts:
-                t=0
-                for i in ipt[1]:
-                    if i[7]==1:
-                        pass
-                        #sp=self.cursor.execute('SELECT startofplay FROM games WHERE id=(?);',(str(i[1]))).fetchone()[0]
-                        #print(sp)
-                        #t+=0
-                    else:
-                        t+=i[6]
-            #t=ipt
-            #print([x,t])
-                if t>0:
-                    if allplatforms:
-                        itemswtimes.append([x+' ('+ipt[0]+')',t])
-                    else:
-                        itemswtimes.append([x,t])
-        itemswtimes.sort(key=lambda x:x[1], reverse=True)
-        tt=sum([x[1] for x in itemswtimes])
-        r=[{'rank':str(n+1),'name':x[0],'time':str(int(x[1]/60))+'h '+str(x[1]%60)+'m','perc':'('+str(int(x[1]/tt*100))+'%)'} for n,x in enumerate(itemswtimes)]
         r.append({'rank':'Total','name':'','time':str(int(tt/60))+'h '+str(tt%60)+'m','perc':''})
         return r
 

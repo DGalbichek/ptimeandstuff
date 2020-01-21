@@ -164,7 +164,7 @@ def ptimepage():
     l4=m(10,ptdb.top(what='platform',what2={'months':'0'}),False)
     l5=m(25,ptdb.top(what2={}))
     l6=m(20,ptdb.top(what='platform',what2={}),False)
-    l7=m(20,ptdb.top(what2={'impressions':''}),False)
+    l7=m(25,ptdb.top(what2={'impressions':''}),False)
     now=datetime.datetime.now()
     curryear=now.strftime('%Y')
 
