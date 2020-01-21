@@ -64,8 +64,11 @@ class PTimeDb():
             raise e
 
 
-    def _hm(self,t,sep=' '):
-        return ('-' if t<0 else '') + str(int(abs(t)/60))+'h'+sep+str(int(abs(t))%60)+'m'
+    def _value(self,t,sep=' ',timevalue=True):
+        if timevalue:
+            return ('-' if t<0 else '') + str(int(abs(t)/60))+'h'+sep+str(int(abs(t))%60)+'m'
+        else:
+            return str(t)
 
 
     def _iym(self,ym):
@@ -75,7 +78,7 @@ class PTimeDb():
             return ym[:5]+str(int(ym[-2:])+1).zfill(2)
 
 
-    def monthly_table(self,mtaim):
+    def monthly_table(self,mtaim,timedata=True):
         mtaim.sort(key=lambda x:x[1])
         if len(mtaim)>0:
             mt=[mtaim[0],]
@@ -130,14 +133,14 @@ class PTimeDb():
                     mpt+=' style="background:lightblue;"'
                 mpt+='>'
                 if m[0]>0:
-                    mpt+=self._hm(m[0],sep='<br>')
+                    mpt+=self._value(m[0],sep='<br>',timevalue=timedata)
                 mpt+="</td>"
 
                 # dec, total, avg
                 if m[1][-2:]=='12':
                     if yavg>0:
-                        mpt+='<td align="right" style="background:lightgreen;">'+self._hm(ytot,sep='<br>')
-                        mpt+='</td><td align="right" style="background:lightgreen;">'+self._hm(yavg,sep='<br>')
+                        mpt+='<td align="right" style="background:lightgreen;">'+self._value(ytot,sep='<br>',timevalue=timedata)
+                        mpt+='</td><td align="right" style="background:lightgreen;">'+self._value(yavg,sep='<br>',timevalue=timedata)
                     else:
                         mpt+='<td style="background:lightgrey;"><td style="background:lightgrey;">'
                     mpt+="</td></tr>"
@@ -149,8 +152,8 @@ class PTimeDb():
             # incomplete year's total and avg
             if mpt[-5:]!="</tr>":
                 if yavg>0:
-                    mpt+='<td align="right" style="background:lightgreen;">'+self._hm(ytot,sep='<br>')
-                    mpt+='</td><td align="right" style="background:lightgreen;">'+self._hm(yavg,sep='<br>')
+                    mpt+='<td align="right" style="background:lightgreen;">'+self._value(ytot,sep='<br>',timevalue=timedata)
+                    mpt+='</td><td align="right" style="background:lightgreen;">'+self._value(yavg,sep='<br>',timevalue=timedata)
                 else:
                     mpt+='<td style="background:lightgrey;"></td><td style="background:lightgrey;">'
                 mpt+="</td></tr>"
@@ -294,7 +297,7 @@ class PTimeDb():
                     elif m=='daily music' and t>0:
                         bal+=str(int(t))+'m'
                     elif t!=0:
-                        bal+=self._hm(t,sep='<br>')
+                        bal+=self._value(t,sep='<br>')
                     bal+="</td>"
                 bal+='</tr>'
             bal+='</tbody></table>'
@@ -302,7 +305,7 @@ class PTimeDb():
             if bal_year == 'this year':
                 high='<h1>curr month: <font style="background:'
                 high+='red' if highlights['month']['ratio']<BALANCERATIO else 'lightgreen'
-                high+=';">'+self._hm(highlights['month']['balance'], sep=' ')
+                high+=';">'+self._value(highlights['month']['balance'], sep=' ')
                 high+=' ('+"{0:.2f}".format(highlights['month']['ratio'])+')</font>'
                 if 'dynamics' in highlights['month']:
                     high+='<font style="background:'+highlights['month']['dynamics'][0]+';"> '
@@ -312,7 +315,7 @@ class PTimeDb():
                     high+='</font>'
                 high+='</h1><h1>this year: <font style="background:'
                 high+='red' if highlights['year']['ratio']<BALANCERATIO else 'lightgreen'
-                high+=';">'+self._hm(highlights['year']['balance'], sep=' ')
+                high+=';">'+self._value(highlights['year']['balance'], sep=' ')
                 high+=' ('+"{0:.2f}".format(highlights['year']['ratio'])+')</font></h1>'
                 high+='<h1>target: '+"{0:.2f}".format(BALANCERATIO)+'</h1><hr>'
 
