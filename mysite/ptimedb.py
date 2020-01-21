@@ -184,14 +184,16 @@ class PTimeDb():
         exercise={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Exercise','aggr':'monthly','years':yearsback}) if bal_year in x[1]}
 
         allgames={x[1]:x[0] for x in self.list('playtime',what2={'aggr':'monthly','years':yearsback}) if bal_year in x[1]}
+        entries={x[1]:x[0] for x in self.list('playtime',what2={'aggr':'monthly','count':'','years':yearsback}) if bal_year in x[1]}
 
-        return ymonths, music, boardgames, learning, exercise, allgames
+        return ymonths, music, boardgames, learning, exercise, allgames, entries
 
         
     def balance(self):
         bal=''
         for bal_year in ['this year', 'last year',]:
-            ymonths, music, boardgames, learning, exercise, allgames = self._balance_gather(bal_year=bal_year)
+            ymonths, music, boardgames, learning, exercise, allgames, entries = self._balance_gather(bal_year=bal_year)
+
             ## TABLE
             # header
             bal+="<h1>"+bal_year+"</h1>"
@@ -199,7 +201,7 @@ class PTimeDb():
             highlights={'month':{},'year':{}}
 
             # months with data buildup
-            for m in ['balance','ratio','music','daily music','vg','bg','learn','exercise','total',]:
+            for m in ['balance','ratio','music','daily music','vg','bg','learn','exercise','total','entries']:
                 # row title
                 bal+="<tr><td><b>"+m+"</b></td>"
 
@@ -239,6 +241,8 @@ class PTimeDb():
                         ts.append(exe)
                     elif m=='total':
                         ts.append(tot)
+                    elif m=='entries':
+                        ts.append(entries.get(ym,0))
                     else:
                         pass
 
@@ -294,6 +298,8 @@ class PTimeDb():
                     bal+='>'
                     if m=='ratio' and t>0:
                         bal+="{0:.2f}".format(t)
+                    elif m=='entries' and t>0:
+                        bal+=str(int(t))
                     elif m=='daily music' and t>0:
                         bal+=str(int(t))+'m'
                     elif t!=0:
@@ -448,7 +454,8 @@ class PTimeDb():
             else:
                 aaa=False
                 if 'aggr' in what2:
-                    sql='''SELECT SUM(ptime) AS mptime, strftime("%Y-%m", t_start) AS yrmth '''
+                    sql='SELECT '+('COUNT' if 'count' in what2 else 'SUM')
+                    sql+='(ptime) AS mptime, strftime("%Y-%m", t_start) AS yrmth '
                 else:
                     sql='''SELECT * '''
                 sql+='''FROM playtime '''

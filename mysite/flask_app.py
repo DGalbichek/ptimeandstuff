@@ -157,6 +157,8 @@ def ptimepage():
 
     mtaim=ptdb.list('playtime',what2={'aggr':'monthly'})
     mpt=ptdb.monthly_table(mtaim)
+    mecount=ptdb.list('playtime',what2={'aggr':'monthly', 'count':''})
+    mec=ptdb.monthly_table(mecount, timedata=False)
 
     l1=m(20,ptdb.top(what2={'years':'0','gameperplatform':''}))
     l2=m(10,ptdb.top(what2={'months':'0','gameperplatform':''}))
@@ -183,6 +185,7 @@ def ptimepage():
     return render_template('ptime.html',
                            title='ptime',
                            mpt=mpt,
+                           mec=mec,
                            tops=tops,
                            tags=tags
                            )
@@ -297,13 +300,15 @@ def ptimesinglpage(msg=[]):
     form.game.choices.insert(0, (0, '---'))
     ptdb.db.close()
     tot=[]
-    mpt=''
+    mpt,mec='',''
     pt=[]
 
     if form.validate_on_submit():
         ptdb=ptimedb.PTimeDb()
         mtaim=ptdb.list('playtime',what2={'game':form.game.data,'aggr':'monthly'})
         mpt=ptdb.monthly_table(mtaim)
+        mecount=ptdb.list('playtime',what2={'game':form.game.data,'aggr':'monthly','count':''})
+        mec=ptdb.monthly_table(mecount, timedata=False)
 
         taim=ptdb.list('playtime',what2={'game':form.game.data})
         taim.sort(key=lambda x:x[4], reverse=True)
@@ -317,6 +322,7 @@ def ptimesinglpage(msg=[]):
                            form=form,
                            tot=tot,
                            mpt=mpt,
+                           mec=mec,
                            pt=pt)
 
 

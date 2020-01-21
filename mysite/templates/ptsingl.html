@@ -43,6 +43,15 @@
 <hr>
 </div>
 {% endif %}
+{% if mec %}
+<div>
+<hr>
+    {% autoescape false %}
+        {{ mec }}
+    {% endautoescape %}
+<hr>
+</div>
+{% endif %}
 
 {% for t in pt %}<p>{{t}}</p>{% endfor %}
 {% endblock %}
