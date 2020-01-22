@@ -159,6 +159,8 @@ def ptimepage():
     mpt=ptdb.monthly_table(mtaim)
     mecount=ptdb.list('playtime',what2={'aggr':'monthly', 'count':''})
     mec=ptdb.monthly_table(mecount, timedata=False)
+    mtcount=ptdb.list('playtime',what2={'aggr':'monthly', 'count':'titles'})
+    mtc=ptdb.monthly_table(mtcount, timedata=False, nototal=True)
 
     l1=m(20,ptdb.top(what2={'years':'0','gameperplatform':''}))
     l2=m(10,ptdb.top(what2={'months':'0','gameperplatform':''}))
@@ -186,6 +188,7 @@ def ptimepage():
                            title='ptime',
                            mpt=mpt,
                            mec=mec,
+                           mtc=mtc,
                            tops=tops,
                            tags=tags
                            )

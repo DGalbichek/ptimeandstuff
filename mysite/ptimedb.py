@@ -78,7 +78,7 @@ class PTimeDb():
             return ym[:5]+str(int(ym[-2:])+1).zfill(2)
 
 
-    def monthly_table(self,mtaim,timedata=True):
+    def monthly_table(self,mtaim,timedata=True,nototal=False):
         mtaim.sort(key=lambda x:x[1])
         if len(mtaim)>0:
             mt=[mtaim[0],]
@@ -95,12 +95,15 @@ class PTimeDb():
 
             ## TABLE
             # header
-            mpt="<table><tbody><tr><th></th>"+''.join(['<th>'+str(n)+'</th>' for n in range(1,13)])+"<th>total</th><th>avg</th></tr>"
+            mpt="<table><tbody><tr><th></th>"+''.join(['<th>'+str(n)+'</th>' for n in range(1,13)])
+            if not nototal:
+                mpt+="<th>total</th>"
+            mpt+="<th>avg</th></tr>"
 
             # blank year row(s)
             if mt[0][1][:4]!='2017':
                 for y in range(2017,int(mt[0][1][:4])):
-                    mpt+="<tr><td><b>"+str(y)+"</b></td>"+'<td style="background:grey;"></td>'*14
+                    mpt+="<tr><td><b>"+str(y)+"</b></td>"+'<td style="background:grey;"></td>'*(13 if nototal else 14)
 
             # blank initial cells
             mpt+="<tr><td><b>"+mt[0][1][:4]+"</b></td>"
@@ -139,8 +142,9 @@ class PTimeDb():
                 # dec, total, avg
                 if m[1][-2:]=='12':
                     if yavg>0:
-                        mpt+='<td align="right" style="background:lightgreen;">'+self._value(ytot,sep='<br>',timevalue=timedata)
-                        mpt+='</td><td align="right" style="background:lightgreen;">'+self._value(yavg,sep='<br>',timevalue=timedata)
+                        if not nototal:
+                            mpt+='<td align="right" style="background:lightgreen;">'+self._value(ytot,sep='<br>',timevalue=timedata)+'</td>'
+                        mpt+='<td align="right" style="background:lightgreen;">'+self._value(yavg,sep='<br>',timevalue=timedata)
                     else:
                         mpt+='<td style="background:lightgrey;"><td style="background:lightgrey;">'
                     mpt+="</td></tr>"
@@ -152,8 +156,9 @@ class PTimeDb():
             # incomplete year's total and avg
             if mpt[-5:]!="</tr>":
                 if yavg>0:
-                    mpt+='<td align="right" style="background:lightgreen;">'+self._value(ytot,sep='<br>',timevalue=timedata)
-                    mpt+='</td><td align="right" style="background:lightgreen;">'+self._value(yavg,sep='<br>',timevalue=timedata)
+                    if not nototal:
+                        mpt+='<td align="right" style="background:lightgreen;">'+self._value(ytot,sep='<br>',timevalue=timedata)+'</td>'
+                    mpt+='<td align="right" style="background:lightgreen;">'+self._value(yavg,sep='<br>',timevalue=timedata)
                 else:
                     mpt+='<td style="background:lightgrey;"></td><td style="background:lightgrey;">'
                 mpt+="</td></tr>"
@@ -185,25 +190,31 @@ class PTimeDb():
 
         allgames={x[1]:x[0] for x in self.list('playtime',what2={'aggr':'monthly','years':yearsback}) if bal_year in x[1]}
         entries={x[1]:x[0] for x in self.list('playtime',what2={'aggr':'monthly','count':'','years':yearsback}) if bal_year in x[1]}
+        titles={x[1]:x[0] for x in self.list('playtime',what2={'aggr':'monthly','count':'titles','years':yearsback}) if bal_year in x[1]}
+        titles['total']=[x[0] for x in self.list('playtime',what2={'aggr':'yearly','count':'titles','years':yearsback}) if bal_year in x[1]][0]
 
-        return ymonths, music, boardgames, learning, exercise, allgames, entries
+
+        return ymonths, music, boardgames, learning, exercise, allgames, entries, titles
 
         
     def balance(self):
         bal=''
         for bal_year in ['this year', 'last year',]:
-            ymonths, music, boardgames, learning, exercise, allgames, entries = self._balance_gather(bal_year=bal_year)
+            ymonths, music, boardgames, learning, exercise, allgames, entries, titles = self._balance_gather(bal_year=bal_year)
 
             ## TABLE
             # header
             bal+="<h1>"+bal_year+"</h1>"
-            bal+="<table><tbody><tr><th></th>"+''.join(['<th>'+str(n)+'</th>' for n in range(1,13)])+"<th>total</th><th>avg</th></tr>"
+            bal+='<table><tbody><tr><th></th>'+''.join(['<th>'+str(n)+'</th>' for n in range(1,13)])+"<th>total</th><th>avg</th></tr>"
             highlights={'month':{},'year':{}}
 
             # months with data buildup
-            for m in ['balance','ratio','music','daily music','vg','bg','learn','exercise','total','entries']:
+            for m in ['balance','ratio','music','daily music','vg','bg','learn','exercise','total','entries','titles']:
                 # row title
-                bal+="<tr><td><b>"+m+"</b></td>"
+                bal+="<tr>"
+                if m=='entries':
+                    bal+='<td>-</td></tr><tr>'
+                bal+="<td><b>"+m+"</b></td>"
 
                 ts=[]
                 for ym in ymonths:
@@ -243,6 +254,8 @@ class PTimeDb():
                         ts.append(tot)
                     elif m=='entries':
                         ts.append(entries.get(ym,0))
+                    elif m=='titles':
+                        ts.append(titles.get(ym,0))
                     else:
                         pass
 
@@ -262,6 +275,8 @@ class PTimeDb():
 
                 ctot=sum(ts)
                 cavg=ctot/len(ts)
+                if m=='titles':
+                    ctot=titles['total']
 
                 #yearfill
                 for a in range(12-len(ts)):
@@ -293,12 +308,14 @@ class PTimeDb():
                         bal+=' style="background:red;"'
                     elif (m=='balance' and t>0) or (m=='ratio' and t>=BALANCERATIO):
                         bal+=' style="background:lightgreen;"'
+                    elif ctot==0:
+                        pass
                     elif nn<12 and t!=0 and t>=cavg:
                         bal+=' style="background:lightblue;"'
                     bal+='>'
                     if m=='ratio' and t>0:
                         bal+="{0:.2f}".format(t)
-                    elif m=='entries' and t>0:
+                    elif (m=='entries' or m=='titles') and t>0:
                         bal+=str(int(t))
                     elif m=='daily music' and t>0:
                         bal+=str(int(t))+'m'
@@ -454,8 +471,18 @@ class PTimeDb():
             else:
                 aaa=False
                 if 'aggr' in what2:
-                    sql='SELECT '+('COUNT' if 'count' in what2 else 'SUM')
-                    sql+='(ptime) AS mptime, strftime("%Y-%m", t_start) AS yrmth '
+                    sql='SELECT '
+                    if 'count' in what2:
+                        if what2['count']=='titles':
+                            sql+='COUNT(DISTINCT game)'
+                        else:
+                            sql+='COUNT(ptime)'
+                    else:
+                        sql+='SUM(ptime)'
+                    if what2['aggr']=='yearly':
+                        sql+=' AS mptime, strftime("%Y", t_start) AS yrmth '
+                    else:
+                        sql+=' AS mptime, strftime("%Y-%m", t_start) AS yrmth '
                 else:
                     sql='''SELECT * '''
                 sql+='''FROM playtime '''
@@ -482,7 +509,10 @@ class PTimeDb():
                 elif 'years' in what2:
                     sql+='''t_end>= date('now','start of year','-'''+str(what2['years'])+''' year')'''
                 if 'aggr' in what2:
-                    sql+=''' GROUP BY strftime("%Y-%m", t_start);'''
+                    if what2['aggr']=='yearly':
+                        sql+=''' GROUP BY strftime("%Y", t_start);'''
+                    else:
+                        sql+=''' GROUP BY strftime("%Y-%m", t_start);'''
                 else:
                     sql+=';'
                 #print(sql)
