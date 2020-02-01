@@ -42,20 +42,5 @@
 <hr>
 
 
-<p class="medium">Tags:</p>
-{% for t in tags %}
-	<h1 align="left">{{t.rank}} [{{t.time}}] {{t.name}}</h1>
-
-	<table>
-	{% for tl in t.titles %}
-		<tr>
-		<td align="left">{{tl.name}}</td>
-		<td align="right" style="padding-left:32px">{{tl.time}}</td>
-		</tr>
-	{% endfor %}
-	</table>
-{% endfor %}
-
-
 
 {% endblock %}

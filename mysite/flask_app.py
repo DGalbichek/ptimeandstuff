@@ -182,15 +182,13 @@ def ptimepage():
         {'title':'Top '+str(len(l6))+' platforms of all time (well, 2017-)', 'list': l6},
         ]
 
-    tags=ptdb.toptags()
     ptdb.db.close()
     return render_template('ptime.html',
                            title='ptime',
                            mpt=mpt,
                            mec=mec,
                            mtc=mtc,
-                           tops=tops,
-                           tags=tags
+                           tops=tops
                            )
 
 
@@ -212,10 +210,12 @@ def tagspage():
         ttaim=[(ttaim[x],x) for x in ttaim.keys()]
         tmpt.append((tag[0],ptdb.monthly_table(ttaim)))
 
+    tags=ptdb.toptags()
     ptdb.db.close()
     return render_template('ptimetags.html',
                            title='ptime tags',
                            tmpt=tmpt,
+                           tags=tags
                            )
 
 
