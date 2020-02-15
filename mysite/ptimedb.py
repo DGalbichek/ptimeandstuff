@@ -9,6 +9,7 @@ import sqlite3
 
 WHAT = {'game':'games','platform':'platforms','tag':'tags'}
 BALANCERATIO = 0.5
+DAILYMUSICTARGET = 30
 
 
 class PTimeDb():
@@ -304,9 +305,9 @@ class PTimeDb():
                 # month cells
                 for nn,t in enumerate(ts):
                     bal+='<td align="right"'
-                    if (m=='balance' and t<0) or (m=='ratio' and t<BALANCERATIO and t>0):
+                    if (m=='balance' and t<0) or (m=='ratio' and t<BALANCERATIO and t>0) or (m=='daily music' and t<DAILYMUSICTARGET and t>0):
                         bal+=' style="background:red;"'
-                    elif (m=='balance' and t>0) or (m=='ratio' and t>=BALANCERATIO):
+                    elif (m=='balance' and t>0) or (m=='ratio' and t>=BALANCERATIO) or (m=='daily music' and t>=DAILYMUSICTARGET):
                         bal+=' style="background:lightgreen;"'
                     elif ctot==0:
                         pass
@@ -340,7 +341,8 @@ class PTimeDb():
                 high+='red' if highlights['year']['ratio']<BALANCERATIO else 'lightgreen'
                 high+=';">'+self._value(highlights['year']['balance'], sep=' ')
                 high+=' ('+"{0:.2f}".format(highlights['year']['ratio'])+')</font></h1>'
-                high+='<h1>target: '+"{0:.2f}".format(BALANCERATIO)+'</h1><hr>'
+                high+='<h1>target ratio: '+"{0:.2f}".format(BALANCERATIO)+'</h1>'
+                high+='<h1>daily music target: ' + str(DAILYMUSICTARGET) + 'm </h1><hr>'
 
         return high+bal
 
