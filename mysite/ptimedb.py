@@ -210,7 +210,7 @@ class PTimeDb():
             highlights={'month':{},'year':{}}
 
             # months with data buildup
-            for m in ['balance','ratio','music','daily music','vg','bg','learn','exercise','total','entries','titles']:
+            for m in ['balance','ratio','music','daily music','vg','bg','learn','daily learn','exercise','total','entries','titles']:
                 # row title
                 bal+="<tr>"
                 if m=='entries':
@@ -249,6 +249,11 @@ class PTimeDb():
                         ts.append(boa)
                     elif m=='learn':
                         ts.append(lea)
+                    elif m=='daily learn':
+                        if bal_year=='this year' and ym==ymonths[-1]:
+                            ts.append(lea/datetime.datetime.now().day)
+                        else:
+                            ts.append(lea/monthrange(int(ym[:4]),int(ym[-2:]))[1])
                     elif m=='exercise':
                         ts.append(exe)
                     elif m=='total':
@@ -296,6 +301,11 @@ class PTimeDb():
                         ts.append(sum([music.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
                     else:
                         ts.append(sum([music.get(ym,0) for ym in ymonths])/365)
+                elif m=='daily learn':
+                    if bal_year=='this year':
+                        ts.append(sum([learning.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
+                    else:
+                        ts.append(sum([learning.get(ym,0) for ym in ymonths])/365)
                 else:
                     ts.append(ctot)
                     if m=='balance':
@@ -318,7 +328,7 @@ class PTimeDb():
                         bal+="{0:.2f}".format(t)
                     elif (m=='entries' or m=='titles') and t>0:
                         bal+=str(int(t))
-                    elif m=='daily music' and t>0:
+                    elif (m=='daily music' or m=='daily learn') and t>0:
                         bal+=str(int(t))+'m'
                     elif t!=0:
                         bal+=self._value(t,sep='<br>')
