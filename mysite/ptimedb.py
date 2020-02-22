@@ -509,7 +509,7 @@ class PTimeDb():
                 if 'platform' in what2:
                     sql+='platform='+str(self.idof('platform',what2['platform']))
                     aaa=True
-                if aaa and ('days' in what2 or 'months' in what2 or 'years' in what2):
+                if aaa and [x for x in ['days', 'months', 'years', 'ym'] if x in what2]:
                     sql+=' AND '
                     aaa=False
                 if 'days' in what2:
@@ -520,6 +520,8 @@ class PTimeDb():
                     sql+='''t_end>= date('now','start of month','-'''+str(what2['months'])+''' month')'''
                 elif 'years' in what2:
                     sql+='''t_end>= date('now','start of year','-'''+str(what2['years'])+''' year')'''
+                elif 'ym' in what2:
+                    sql+='''strftime('%Y-%m', t_end) = \'''' + what2['ym'] + '\''
                 if 'aggr' in what2:
                     if what2['aggr']=='yearly':
                         sql+=''' GROUP BY strftime("%Y", t_start);'''

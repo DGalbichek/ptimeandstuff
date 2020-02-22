@@ -142,6 +142,20 @@ def autocomplete():
     return Response(json.dumps(GAMES), mimetype='application/json')
 
 
+def _ym_up_til_now():
+    yms = ['2017-01',]
+    while yms[-1]!=datetime.datetime.now().strftime('%Y-%m'):
+        y = int(yms[-1][:4])
+        m = int(yms[-1][-2:])
+        if m == 12:
+            m = 1
+            y += 1
+        else:
+            m += 1
+        yms.append(str(y)+'-'+str(m).zfill(2))
+    return yms
+
+
 @app.route("/ptime", methods=['GET'])
 @app.route("/ptime/", methods=['GET'])
 def ptimepage():
@@ -216,6 +230,45 @@ def tagspage():
                            title='ptime tags',
                            tmpt=tmpt,
                            tags=tags
+                           )
+
+
+@app.route("/ptime/no1s", methods=['GET'])
+@app.route("/ptime/no1s/", methods=['GET'])
+def no1spage():
+    ptdb=ptimedb.PTimeDb()
+    def m(m,l,tot=True):
+        if len(l)>m:
+            r=l[:m]
+        else:
+            r=l[:-1]
+        if tot:
+            r+=l[-1:]
+        return r
+
+    no1s = []
+    bigrunners = {}
+    yms = _ym_up_til_now()
+    for ym in yms:
+        curr = m(1,ptdb.top(what2={'ym':ym,'gameperplatform':''}))
+        no1s.append({
+            'ym': ym,
+            'name': curr[0]['name'],
+            'time': curr[0]['time'],
+            'perc': curr[0]['perc'],
+            })
+        if curr[0]['name'] in bigrunners:
+            bigrunners[curr[0]['name']] += 1
+        else:
+            bigrunners[curr[0]['name']] = 1
+    bigrunners = [(x, bigrunners[x]) for x in bigrunners]
+    bigrunners.sort(key=lambda x: x[1], reverse=True)
+
+    ptdb.db.close()
+    return render_template('ptimeno1s.html',
+                           title='ptime number 1s',
+                           no1s=no1s,
+                           bigrunners=bigrunners
                            )
 
 
