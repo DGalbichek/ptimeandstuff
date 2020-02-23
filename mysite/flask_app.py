@@ -143,7 +143,7 @@ def autocomplete():
 
 
 def _ym_up_til_now():
-    yms = ['2017-01',]
+    yms = ['2019-12',]
     while yms[-1]!=datetime.datetime.now().strftime('%Y-%m'):
         y = int(yms[-1][:4])
         m = int(yms[-1][-2:])
@@ -251,16 +251,22 @@ def no1spage():
     yms = _ym_up_til_now()
     for ym in yms:
         curr = m(1,ptdb.top(what2={'ym':ym,'gameperplatform':''}))
-        no1s.append({
-            'ym': ym,
-            'name': curr[0]['name'],
-            'time': curr[0]['time'],
-            'perc': curr[0]['perc'],
-            })
-        if curr[0]['name'] in bigrunners:
-            bigrunners[curr[0]['name']] += 1
+        if len(curr) > 1:
+            no1s.append({
+                'ym': ym,
+                'name': curr[0]['name'],
+                'time': curr[0]['time'],
+                'perc': curr[0]['perc'],
+                })
+            if curr[0]['name'] in bigrunners:
+                bigrunners[curr[0]['name']] += 1
+            else:
+                bigrunners[curr[0]['name']] = 1
         else:
-            bigrunners[curr[0]['name']] = 1
+            no1s.append({
+                'ym': ym,
+                'name': 'n/a',
+                })            
     bigrunners = [(x, bigrunners[x]) for x in bigrunners]
     bigrunners.sort(key=lambda x: x[1], reverse=True)
 

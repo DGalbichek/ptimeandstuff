@@ -164,6 +164,8 @@ class PTimeDb():
                     mpt+='<td style="background:lightgrey;"></td><td style="background:lightgrey;">'
                 mpt+="</td></tr>"
             mpt+="</tbody></table>"
+        else:
+            mpt = ''
         return mpt
 
 
