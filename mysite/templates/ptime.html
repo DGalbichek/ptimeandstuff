@@ -2,6 +2,21 @@
 
 {% block ptimecontent %}
 
+  <form action="" method="post" name="enterdata">
+      {{ form.hidden_tag() }}
+
+      <table>
+	<tr>
+	  <td align="left">{{ form.ym(size=1, class='medium') }}<input type="submit" value="OK" class="larger"></td></tr>
+	  <tr><td align="left">{% for error in form.ym.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+	</td></tr>
+
+	<tr><td>
+	</table>
+  </form>
+<hr>
 
 	{% for t in tops %}
 		<p class="medium">{{ t.title }}</p></br>

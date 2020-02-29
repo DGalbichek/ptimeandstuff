@@ -51,6 +51,7 @@ import ptimedb
 
 ##
 ## FLASK
+import calendar
 import datetime
 import glob
 import markdown
@@ -76,6 +77,9 @@ class PTForm(FlaskForm):
 class STForm(FlaskForm):
     sdate = DateField('Date', format="%d/%m/%Y", validators=[DataRequired()])
     stime = StringField('STime', validators=[DataRequired()])
+
+class PTarchiveForm(FlaskForm):
+    ym=SelectField('Ym',coerce=str, validators=[DataRequired()])
 
 class PTsForm(FlaskForm):
     game=SelectField('Game',coerce=int, validators=[DataRequired()])
@@ -143,7 +147,7 @@ def autocomplete():
 
 
 def _ym_up_til_now():
-    yms = ['2019-12',]
+    yms = ['2017-01',]
     while yms[-1]!=datetime.datetime.now().strftime('%Y-%m'):
         y = int(yms[-1][:4])
         m = int(yms[-1][-2:])
@@ -156,10 +160,12 @@ def _ym_up_til_now():
     return yms
 
 
-@app.route("/ptime", methods=['GET'])
-@app.route("/ptime/", methods=['GET'])
+@app.route("/ptime", methods=['GET', 'POST'])
+@app.route("/ptime/", methods=['GET', 'POST'])
 def ptimepage():
     ptdb=ptimedb.PTimeDb()
+    form = PTarchiveForm()
+    form.ym.choices=[(x,x) for x in _ym_up_til_now()][::-1]
     def m(m,l,tot=True):
         if len(l)>m:
             r=l[:m]
@@ -169,6 +175,23 @@ def ptimepage():
             r+=l[-1:]
         return r
 
+    now=datetime.datetime.now()
+    curryear=now.strftime('%Y')
+    if form.validate_on_submit():
+        l2=ptdb.top(what2={'ym':form.ym.data,'gameperplatform':''})
+        l4=ptdb.top(what='platform',what2={'ym':form.ym.data})[:-1]
+        yearmonth=calendar.month_name[int(form.ym.data[-2:])]+' '+form.ym.data[:-3]
+    else:
+        l2=ptdb.top(what2={'months':'0','gameperplatform':''})
+        l4=ptdb.top(what='platform',what2={'months':'0'})[:-1]
+        yearmonth=now.strftime('%B')+' '+curryear
+
+    l1=m(20,ptdb.top(what2={'years':'0','gameperplatform':''}))
+    l3=m(10,ptdb.top(what='platform',what2={'years':'0'}),False)
+    l5=m(25,ptdb.top(what2={}))
+    l6=m(20,ptdb.top(what='platform',what2={}),False)
+    l7=m(25,ptdb.top(what2={'impressions':''}),False)
+
     mtaim=ptdb.list('playtime',what2={'aggr':'monthly'})
     mpt=ptdb.monthly_table(mtaim)
     mecount=ptdb.list('playtime',what2={'aggr':'monthly', 'count':''})
@@ -176,19 +199,9 @@ def ptimepage():
     mtcount=ptdb.list('playtime',what2={'aggr':'monthly', 'count':'titles'})
     mtc=ptdb.monthly_table(mtcount, timedata=False, nototal=True)
 
-    l1=m(20,ptdb.top(what2={'years':'0','gameperplatform':''}))
-    l2=ptdb.top(what2={'months':'0','gameperplatform':''})
-    l3=m(10,ptdb.top(what='platform',what2={'years':'0'}),False)
-    l4=ptdb.top(what='platform',what2={'months':'0'})[:-1]
-    l5=m(25,ptdb.top(what2={}))
-    l6=m(20,ptdb.top(what='platform',what2={}),False)
-    l7=m(25,ptdb.top(what2={'impressions':''}),False)
-    now=datetime.datetime.now()
-    curryear=now.strftime('%Y')
-
     tops=[
-        {'title': str(len(l2)-1)+' games in '+now.strftime('%B')+' '+curryear, 'list': l2},
-        {'title': str(len(l4))+' platforms in '+now.strftime('%B')+' '+curryear, 'list': l4},
+        {'title': str(len(l2)-1)+' games in '+yearmonth, 'list': l2},
+        {'title': str(len(l4))+' platforms in '+yearmonth, 'list': l4},
         {'title': 'Top '+str(len(l1)-1)+' games in '+curryear, 'list': l1},
         {'title': 'Top '+str(len(l3))+' platforms in '+curryear, 'list': l3},
         {'title': 'Top '+str(len(l7))+' impressions of all time (well, 2017-)', 'list': l7},
@@ -199,6 +212,7 @@ def ptimepage():
     ptdb.db.close()
     return render_template('ptime.html',
                            title='ptime',
+                           form=form,
                            mpt=mpt,
                            mec=mec,
                            mtc=mtc,
