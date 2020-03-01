@@ -175,19 +175,23 @@ def ptimepage():
             r+=l[-1:]
         return r
 
-    now=datetime.datetime.now()
-    curryear=now.strftime('%Y')
+    
     if form.validate_on_submit():
         l2=ptdb.top(what2={'ym':form.ym.data,'gameperplatform':''})
         l4=ptdb.top(what='platform',what2={'ym':form.ym.data})[:-1]
-        yearmonth=calendar.month_name[int(form.ym.data[-2:])]+' '+form.ym.data[:-3]
+        curryear=form.ym.data[:-3]
+        curryearmonth=calendar.month_name[int(form.ym.data[-2:])]+' '+curryear
+        l1=m(20,ptdb.top(what2={'y':curryear,'gameperplatform':''}))
+        l3=m(10,ptdb.top(what='platform',what2={'y':curryear}),False)
     else:
         l2=ptdb.top(what2={'months':'0','gameperplatform':''})
         l4=ptdb.top(what='platform',what2={'months':'0'})[:-1]
-        yearmonth=now.strftime('%B')+' '+curryear
+        now=datetime.datetime.now()
+        curryear=now.strftime('%Y')
+        curryearmonth=now.strftime('%B')+' '+curryear
+        l1=m(20,ptdb.top(what2={'years':'0','gameperplatform':''}))
+        l3=m(10,ptdb.top(what='platform',what2={'years':'0'}),False)
 
-    l1=m(20,ptdb.top(what2={'years':'0','gameperplatform':''}))
-    l3=m(10,ptdb.top(what='platform',what2={'years':'0'}),False)
     l5=m(25,ptdb.top(what2={}))
     l6=m(20,ptdb.top(what='platform',what2={}),False)
     l7=m(25,ptdb.top(what2={'impressions':''}),False)
@@ -200,8 +204,8 @@ def ptimepage():
     mtc=ptdb.monthly_table(mtcount, timedata=False, nototal=True)
 
     tops=[
-        {'title': str(len(l2)-1)+' games in '+yearmonth, 'list': l2},
-        {'title': str(len(l4))+' platforms in '+yearmonth, 'list': l4},
+        {'title': str(len(l2)-1)+' games in '+curryearmonth, 'list': l2},
+        {'title': str(len(l4))+' platforms in '+curryearmonth, 'list': l4},
         {'title': 'Top '+str(len(l1)-1)+' games in '+curryear, 'list': l1},
         {'title': 'Top '+str(len(l3))+' platforms in '+curryear, 'list': l3},
         {'title': 'Top '+str(len(l7))+' impressions of all time (well, 2017-)', 'list': l7},
