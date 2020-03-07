@@ -177,13 +177,15 @@ def ptimepage():
 
     
     if form.validate_on_submit():
-        l2=ptdb.top(what2={'ym':form.ym.data,'gameperplatform':''})
+        ym=form.ym.data
+        l2=ptdb.top(what2={'ym':ym,'gameperplatform':''})
         l4=ptdb.top(what='platform',what2={'ym':form.ym.data})[:-1]
         curryear=form.ym.data[:-3]
         curryearmonth=calendar.month_name[int(form.ym.data[-2:])]+' '+curryear
         l1=m(20,ptdb.top(what2={'y':curryear,'gameperplatform':''}))
         l3=m(10,ptdb.top(what='platform',what2={'y':curryear}),False)
     else:
+        ym=form.ym.choices[0][0]
         l2=ptdb.top(what2={'months':'0','gameperplatform':''})
         l4=ptdb.top(what='platform',what2={'months':'0'})[:-1]
         now=datetime.datetime.now()
@@ -191,6 +193,7 @@ def ptimepage():
         curryearmonth=now.strftime('%B')+' '+curryear
         l1=m(20,ptdb.top(what2={'years':'0','gameperplatform':''}))
         l3=m(10,ptdb.top(what='platform',what2={'years':'0'}),False)
+    ptdb.setCachedData('monthly-games-'+ym,l2)
 
     l5=m(25,ptdb.top(what2={}))
     l6=m(20,ptdb.top(what='platform',what2={}),False)
@@ -266,20 +269,25 @@ def no1spage():
 
     no1s = []
     bigrunners = {}
-    yms = _ym_up_til_now()
+    yms = _ym_up_til_now()[::-1]
     for ym in yms:
-        curr = m(1,ptdb.top(what2={'ym':ym,'gameperplatform':''}))
-        if len(curr) > 1:
-            no1s.append({
-                'ym': ym,
-                'name': curr[0]['name'],
-                'time': curr[0]['time'],
-                'perc': curr[0]['perc'],
-                })
-            if curr[0]['name'] in bigrunners:
-                bigrunners[curr[0]['name']] += 1
-            else:
-                bigrunners[curr[0]['name']] = 1
+        print(ym)
+        curr = ptdb.getCachedData('monthly-games-'+ym, [])
+        if curr:
+            for x in curr[0][1]:
+                print(x)
+            curr = m(1,curr[0][1])
+            if len(curr) > 1:
+                no1s.append({
+                    'ym': ym,
+                    'name': curr[0]['name'],
+                    'time': curr[0]['time'],
+                    'perc': curr[0]['perc'],
+                    })
+                if curr[0]['name'] in bigrunners:
+                    bigrunners[curr[0]['name']] += 1
+                else:
+                    bigrunners[curr[0]['name']] = 1
         else:
             no1s.append({
                 'ym': ym,

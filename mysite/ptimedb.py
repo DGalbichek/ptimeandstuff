@@ -64,6 +64,19 @@ class PTimeDb():
             self.db.rollback()
             raise e
 
+        # Cache Table
+        try:
+            self.cursor.execute('''
+                CREATE TABLE IF NOT EXISTS cached_data(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data_key TEXT UNIQUE,
+                    data_content TEXT
+                );
+                ''')
+            self.db.commit()
+        except Exception as e:
+            self.db.rollback()
+            raise e
 
     def _value(self,t,sep=' ',timevalue=True):
         if timevalue:
@@ -79,6 +92,36 @@ class PTimeDb():
             return ym[:5]+str(int(ym[-2:])+1).zfill(2)
 
 
+    ##
+    ##  CACHING
+    ##
+    def setCachedData(self,dk,cont):
+        if not self.cursor.execute('''SELECT data_key FROM cached_data
+                                WHERE data_key=?;''',(dk,)).fetchone():
+            self.cursor.execute('''INSERT INTO cached_data(data_key, data_content)
+                                VALUES (?,?);''', (dk,json.dumps(cont)))
+        elif dk:
+            self.cursor.execute('''UPDATE cached_data SET data_content=?
+                                WHERE data_key=?;''', (json.dumps(cont),dk))
+        self.db.commit()
+
+
+    def getCachedData(self,dk,novar=[]):
+        data = self.cursor.execute('''SELECT data_key,data_content FROM cached_data
+                                WHERE data_key LIKE '%'''+dk+'''%';''').fetchall()
+        if data:
+            return [(x[0],json.loads(x[1])) for x in data]
+        else:
+            return novar
+
+
+    def listCachedData(self):
+        return [x[0] for x in self.cursor.execute('''SELECT data_key FROM cached_data;''').fetchall()]
+
+
+    ##
+    ##  DATA
+    ##
     def monthly_table(self,mtaim,timedata=True,nototal=False):
         mtaim.sort(key=lambda x:x[1])
         if len(mtaim)>0:
@@ -716,7 +759,7 @@ if __name__=='__main__':
     '''
 
 
-    print('Games:',[x[0] for x in ptdb.list('game')])
+    """print('Games:',[x[0] for x in ptdb.list('game')])
     #print('Platforms:',[x[0] for x in ptdb.list('platform')])
     print('*** Tags ***')
     tagtimes=[]
@@ -736,7 +779,7 @@ if __name__=='__main__':
         timstr='['+str(int(tt[1]/60))+'h '+str(tt[1]%60)+'m] '
         timstr=' '*(12-len(timstr))+timstr
         print(' '*(8-len(str(n+1)))+str(n+1)+timstr+tt[0]+' '*(40-len(tt[0])))
-    print()
+    print()"""
 
     #if ptdb.list('playtime'):
     #    print('--- last 10 PTs:')
