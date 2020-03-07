@@ -271,11 +271,8 @@ def no1spage():
     bigrunners = {}
     yms = _ym_up_til_now()[::-1]
     for ym in yms:
-        print(ym)
         curr = ptdb.getCachedData('monthly-games-'+ym, [])
         if curr:
-            for x in curr[0][1]:
-                print(x)
             curr = m(1,curr[0][1])
             if len(curr) > 1:
                 no1s.append({
