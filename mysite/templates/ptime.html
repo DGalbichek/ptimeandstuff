@@ -6,11 +6,16 @@
       {{ form.hidden_tag() }}
 
       <table>
-	<tr>
-	  <td align="left">{{ form.ym(size=1, class='medium') }}<input type="submit" value="OK" class="larger"></td></tr>
-	  <tr><td align="left">{% for error in form.ym.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-          {% endfor %}
+	<tr><td align="left">
+		{{ form.ym(size=1, class='medium') }}
+		<input type="submit" name="btn" value="OK" class="larger">
+		<input type="submit" name="btn" value="Calc" class="larger">
+	</td></tr>
+
+	<tr><td align="left">
+		{% for error in form.ym.errors %}
+		<span style="color: red;">[{{ error }}]</span>
+		{% endfor %}
 	</td></tr>
 
 	<tr><td>

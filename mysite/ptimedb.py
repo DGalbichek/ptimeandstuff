@@ -106,13 +106,19 @@ class PTimeDb():
         self.db.commit()
 
 
-    def getCachedData(self,dk,novar=[]):
-        data = self.cursor.execute('''SELECT data_key,data_content FROM cached_data
-                                WHERE data_key LIKE '%'''+dk+'''%';''').fetchall()
-        if data:
-            return [(x[0],json.loads(x[1])) for x in data]
+    def getCachedData(self,dk,novar=[],singl=False):
+        r=novar
+        if singl:
+            data = self.cursor.execute("""SELECT data_key,data_content FROM cached_data
+                                    WHERE data_key=\'"""+dk+"""';""").fetchone()
+            if data:
+                r=json.loads(data[1])
         else:
-            return novar
+            data = self.cursor.execute('''SELECT data_key,data_content FROM cached_data
+                                    WHERE data_key LIKE '%'''+dk+'''%';''').fetchall()
+            if data:
+                r=[(x[0],json.loads(x[1])) for x in data]
+        return r
 
 
     def listCachedData(self):

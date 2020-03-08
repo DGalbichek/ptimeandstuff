@@ -175,29 +175,47 @@ def ptimepage():
             r+=l[-1:]
         return r
 
-    
     if form.validate_on_submit():
         ym=form.ym.data
-        l2=ptdb.top(what2={'ym':ym,'gameperplatform':''})
-        l4=ptdb.top(what='platform',what2={'ym':form.ym.data})[:-1]
-        curryear=form.ym.data[:-3]
-        curryearmonth=calendar.month_name[int(form.ym.data[-2:])]+' '+curryear
-        l1=m(20,ptdb.top(what2={'y':curryear,'gameperplatform':''}))
-        l3=m(10,ptdb.top(what='platform',what2={'y':curryear}),False)
+        getfromcache = request.form['btn'] == 'OK'
     else:
         ym=form.ym.choices[0][0]
-        l2=ptdb.top(what2={'months':'0','gameperplatform':''})
-        l4=ptdb.top(what='platform',what2={'months':'0'})[:-1]
-        now=datetime.datetime.now()
-        curryear=now.strftime('%Y')
-        curryearmonth=now.strftime('%B')+' '+curryear
-        l1=m(20,ptdb.top(what2={'years':'0','gameperplatform':''}))
-        l3=m(10,ptdb.top(what='platform',what2={'years':'0'}),False)
-    ptdb.setCachedData('monthly-games-'+ym,l2)
+        getfromcache = True
+    curryear=ym[:-3]
+    curryearmonth=calendar.month_name[int(ym[-2:])]+' '+curryear
 
-    l5=m(25,ptdb.top(what2={}))
-    l6=m(20,ptdb.top(what='platform',what2={}),False)
-    l7=m(25,ptdb.top(what2={'impressions':''}),False)
+    if getfromcache:
+        l2=ptdb.getCachedData('monthly-games-'+ym,[],singl=True)
+        l4=ptdb.getCachedData('monthly-platforms-'+ym,[],singl=True)
+        l1=ptdb.getCachedData('yearly-games-'+curryear,[],singl=True)
+        l3=ptdb.getCachedData('yearly-platforms-'+curryear,[],singl=True)
+        l5=ptdb.getCachedData('alltime-games',[],singl=True)
+        l6=ptdb.getCachedData('alltime-platforms',[],singl=True)
+        l7=ptdb.getCachedData('alltime-impressions',[],singl=True)
+    else:
+        l2=ptdb.top(what2={'ym':ym,'gameperplatform':''})
+        ptdb.setCachedData('monthly-games-'+ym,l2)
+
+        l4=ptdb.top(what='platform',what2={'ym':form.ym.data})[:-1]
+        ptdb.setCachedData('monthly-platforms-'+ym,l4)
+
+        l1=ptdb.top(what2={'y':curryear,'gameperplatform':''})
+        ptdb.setCachedData('yearly-games-'+curryear,l1)
+
+        l3=ptdb.top(what='platform',what2={'y':curryear})
+        ptdb.setCachedData('yearly-platforms-'+curryear,l3)
+
+        l5=m(40,ptdb.top(what2={}))
+        ptdb.setCachedData('alltime-games',l5)
+
+        l6=m(20,ptdb.top(what='platform',what2={}),False)
+        ptdb.setCachedData('alltime-platforms',l6)
+
+        l7=m(30,ptdb.top(what2={'impressions':''}),False)
+        ptdb.setCachedData('alltime-impressions',l7)
+
+    l1=m(20,l1)
+    l3=m(10,l3,False)
 
     mtaim=ptdb.list('playtime',what2={'aggr':'monthly'})
     mpt=ptdb.monthly_table(mtaim)
