@@ -405,8 +405,10 @@ def ptimesinglpage(msg=[]):
     tot=[]
     mpt,mec='',''
     pt=[]
+    stats={}
 
     if form.validate_on_submit():
+        gamename = dict(form.game.choices).get(form.game.data)
         ptdb=ptimedb.PTimeDb()
         mtaim=ptdb.list('playtime',what2={'game':form.game.data,'aggr':'monthly'})
         mpt=ptdb.monthly_table(mtaim)
@@ -417,6 +419,14 @@ def ptimesinglpage(msg=[]):
         taim.sort(key=lambda x:x[4], reverse=True)
         pt=[x[:-1] for x in taim]
         tot=ptdb.top(what='platform',what2={'game':form.game.data,'gameperplatform':''})
+
+        stats={}
+        alltimer=[x for x in ptdb.getCachedData('alltime-games',[],singl=True) if gamename in x['name']]
+        if alltimer:
+            stats['alltimerank']=alltimer[0]['rank']
+        topimpressions=[x for x in ptdb.getCachedData('alltime-impressions',[],singl=True) if gamename in x['name']]
+        if topimpressions:
+            stats['topimpressions']=topimpressions
         ptdb.db.close()
 
     return render_template('ptsingl.html',
@@ -426,6 +436,7 @@ def ptimesinglpage(msg=[]):
                            tot=tot,
                            mpt=mpt,
                            mec=mec,
+                           stats=stats,
                            pt=pt)
 
 

@@ -18,7 +18,7 @@
 	</table>
   </form>
 
-{% if tot %}<p class="medium" align="center">All time total {{(tot|last).time}}</p>{% endif %}
+{% if tot %}<p class="medium" align="center">All time total {{(tot|last).time}}{% if stats.alltimerank %} (#{{stats.alltimerank}}){% endif %}</p>{% endif %}
 
 <div>
 <table>
@@ -43,6 +43,22 @@
 <hr>
 </div>
 {% endif %}
+
+{% if stats.topimpressions %}
+<div>
+<h3>Top impressions</h3>
+<table>
+{% for ti in stats.topimpressions %}
+	<tr>
+	<td align="right" style="padding-right:8px">{{ti.rank}}</td>
+	<td align="left">{{ti.yearmonth}}</td>
+	<td align="right" style="padding-left:32px">{{ti.time}}</td>
+	</tr>
+{% endfor %}
+</table>
+</div>
+{% endif %}
+
 {% if mec %}
 <div>
 <hr>
