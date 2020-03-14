@@ -3,9 +3,9 @@
 {% block ptimecontent %}
 
 
-<p class="medium">Big runners</p></br>
+<p class="medium">Big runners (games)</p></br>
 <table>
-{% for br in bigrunners %}
+{% for br in no1data.games.bigrunners %}
 	<tr style="white-space: nowrap;">
 		<td align="left">{{br.0}}</td>
 		<td align="right" style="padding-left:32px">{{br.1}}</td>
@@ -15,9 +15,21 @@
 <br>
 <hr>
 
-<p class="medium">No.1s</p></br>
+<p class="medium">Big runners (platforms)</p></br>
 <table>
-{% for no1 in no1s %}
+{% for br in no1data.platforms.bigrunners %}
+	<tr style="white-space: nowrap;">
+		<td align="left">{{br.0}}</td>
+		<td align="right" style="padding-left:32px">{{br.1}}</td>
+	</tr>
+{% endfor %}
+</table>
+<br>
+<hr>
+
+<p class="medium">No.1s (games)</p></br>
+<table>
+{% for no1 in no1data.games.no1s %}
 	<tr style="white-space: nowrap;">
 		<td align="right">{{no1.ym}}</td>
 		<td align="left">{{no1.name}}</td>
@@ -29,6 +41,19 @@
 <br>
 <hr>
 
+<p class="medium">No.1s (platforms)</p></br>
+<table>
+{% for no1 in no1data.platforms.no1s %}
+	<tr style="white-space: nowrap;">
+		<td align="right">{{no1.ym}}</td>
+		<td align="left">{{no1.name}}</td>
+		<td align="right" style="padding-left:32px">{{no1.time}}</td>
+		<td align="left">{{no1.perc}}</td>
+	</tr>
+{% endfor %}
+</table>
+<br>
+<hr>
 
 
 {% endblock %}

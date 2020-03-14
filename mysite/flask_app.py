@@ -259,7 +259,7 @@ def tagspage():
                     ttaim[tt[1]]+=tt[0]
                 else:
                     ttaim[tt[1]]=tt[0]
-            print(ptdb.nameof('game',t), flush=True)
+            #print(ptdb.nameof('game',t), flush=True)
         ttaim=[(ttaim[x],x) for x in ttaim.keys()]
         tmpt.append((tag[0],ptdb.monthly_table(ttaim)))
 
@@ -285,37 +285,42 @@ def no1spage():
             r+=l[-1:]
         return r
 
-    no1s = []
-    bigrunners = {}
-    yms = _ym_up_til_now()[::-1]
-    for ym in yms:
-        curr = ptdb.getCachedData('monthly-games-'+ym, [])
-        if curr:
-            curr = m(1,curr[0][1])
-            if len(curr) > 1:
+    no1data = {}
+    for what in ['games','platforms']:
+        no1s = []
+        bigrunners = {}
+        yms = _ym_up_til_now()[::-1]
+        for ym in yms:
+            curr = ptdb.getCachedData('monthly-'+what+'-'+ym, [])
+            if curr:
+                curr = m(1,curr[0][1])
+                if len(curr) > 1:
+                    no1s.append({
+                        'ym': ym,
+                        'name': curr[0]['name'],
+                        'time': curr[0]['time'],
+                        'perc': curr[0]['perc'],
+                        })
+                    if curr[0]['name'] in bigrunners:
+                        bigrunners[curr[0]['name']] += 1
+                    else:
+                        bigrunners[curr[0]['name']] = 1
+            else:
                 no1s.append({
                     'ym': ym,
-                    'name': curr[0]['name'],
-                    'time': curr[0]['time'],
-                    'perc': curr[0]['perc'],
-                    })
-                if curr[0]['name'] in bigrunners:
-                    bigrunners[curr[0]['name']] += 1
-                else:
-                    bigrunners[curr[0]['name']] = 1
-        else:
-            no1s.append({
-                'ym': ym,
-                'name': 'n/a',
-                })            
-    bigrunners = [(x, bigrunners[x]) for x in bigrunners]
-    bigrunners.sort(key=lambda x: x[1], reverse=True)
+                    'name': 'n/a',
+                    })            
+        bigrunners = [(x, bigrunners[x]) for x in bigrunners]
+        bigrunners.sort(key=lambda x: x[1], reverse=True)
+        no1data[what] = {
+            'no1s': no1s,
+            'bigrunners': bigrunners
+        }
 
     ptdb.db.close()
     return render_template('ptimeno1s.html',
                            title='ptime number 1s',
-                           no1s=no1s,
-                           bigrunners=bigrunners
+                           no1data=no1data
                            )
 
 
