@@ -160,6 +160,13 @@ def _ym_up_til_now():
     return yms
 
 
+def _y_up_til_now():
+    ys = ['2017',]
+    while ys[-1]!=datetime.datetime.now().strftime('%Y'):
+        ys.append(str(int(ys[-1]) + 1))
+    return ys
+
+
 @app.route("/ptime", methods=['GET', 'POST'])
 @app.route("/ptime/", methods=['GET', 'POST'])
 def ptimepage():
@@ -285,37 +292,38 @@ def no1spage():
             r+=l[-1:]
         return r
 
-    no1data = {}
-    for what in ['games','platforms']:
-        no1s = []
-        bigrunners = {}
-        yms = _ym_up_til_now()[::-1]
-        for ym in yms:
-            curr = ptdb.getCachedData('monthly-'+what+'-'+ym, [])
-            if curr:
-                curr = m(1,curr[0][1])
-                if len(curr) > 1:
+    no1data = {'games':{}, 'platforms':{}}
+    for what in no1data.keys():
+        for when in ['monthly','yearly']:
+            no1s = []
+            bigrunners = {}
+            yms = _ym_up_til_now()[::-1] if when=='monthly' else _y_up_til_now()[::-1]
+            for ym in yms:
+                curr = ptdb.getCachedData(when+'-'+what+'-'+ym, [])
+                if curr:
+                    curr = m(1,curr[0][1])
+                    if len(curr) > 1:
+                        no1s.append({
+                            'ym': ym,
+                            'name': curr[0]['name'],
+                            'time': curr[0]['time'],
+                            'perc': curr[0]['perc'],
+                            })
+                        if curr[0]['name'] in bigrunners:
+                            bigrunners[curr[0]['name']] += 1
+                        else:
+                            bigrunners[curr[0]['name']] = 1
+                else:
                     no1s.append({
                         'ym': ym,
-                        'name': curr[0]['name'],
-                        'time': curr[0]['time'],
-                        'perc': curr[0]['perc'],
-                        })
-                    if curr[0]['name'] in bigrunners:
-                        bigrunners[curr[0]['name']] += 1
-                    else:
-                        bigrunners[curr[0]['name']] = 1
-            else:
-                no1s.append({
-                    'ym': ym,
-                    'name': 'n/a',
-                    })            
-        bigrunners = [(x, bigrunners[x]) for x in bigrunners]
-        bigrunners.sort(key=lambda x: x[1], reverse=True)
-        no1data[what] = {
-            'no1s': no1s,
-            'bigrunners': bigrunners
-        }
+                        'name': 'n/a',
+                        })            
+            bigrunners = [(x, bigrunners[x]) for x in bigrunners]
+            bigrunners.sort(key=lambda x: x[1], reverse=True)
+            no1data[what][when] = {
+                'no1s': no1s,
+                'bigrunners': bigrunners
+            }
 
     ptdb.db.close()
     return render_template('ptimeno1s.html',

@@ -3,9 +3,9 @@
 {% block ptimecontent %}
 
 
-<p class="medium">Big runners (games)</p></br>
+<p class="medium">Big runners (monthly games)</p></br>
 <table>
-{% for br in no1data.games.bigrunners %}
+{% for br in no1data.games.monthly.bigrunners %}
 	<tr style="white-space: nowrap;">
 		<td align="left">{{br.0}}</td>
 		<td align="right" style="padding-left:32px">{{br.1}}</td>
@@ -15,9 +15,9 @@
 <br>
 <hr>
 
-<p class="medium">Big runners (platforms)</p></br>
+<p class="medium">Big runners (monthly platforms)</p></br>
 <table>
-{% for br in no1data.platforms.bigrunners %}
+{% for br in no1data.platforms.monthly.bigrunners %}
 	<tr style="white-space: nowrap;">
 		<td align="left">{{br.0}}</td>
 		<td align="right" style="padding-left:32px">{{br.1}}</td>
@@ -27,9 +27,9 @@
 <br>
 <hr>
 
-<p class="medium">No.1s (games)</p></br>
+<p class="medium">No.1s (yearly games)</p></br>
 <table>
-{% for no1 in no1data.games.no1s %}
+{% for no1 in no1data.games.yearly.no1s %}
 	<tr style="white-space: nowrap;">
 		<td align="right">{{no1.ym}}</td>
 		<td align="left">{{no1.name}}</td>
@@ -41,9 +41,37 @@
 <br>
 <hr>
 
-<p class="medium">No.1s (platforms)</p></br>
+<p class="medium">No.1s (yearly platforms)</p></br>
 <table>
-{% for no1 in no1data.platforms.no1s %}
+{% for no1 in no1data.platforms.yearly.no1s %}
+	<tr style="white-space: nowrap;">
+		<td align="right">{{no1.ym}}</td>
+		<td align="left">{{no1.name}}</td>
+		<td align="right" style="padding-left:32px">{{no1.time}}</td>
+		<td align="left">{{no1.perc}}</td>
+	</tr>
+{% endfor %}
+</table>
+<br>
+<hr>
+
+<p class="medium">No.1s (monthly games)</p></br>
+<table>
+{% for no1 in no1data.games.monthly.no1s %}
+	<tr style="white-space: nowrap;">
+		<td align="right">{{no1.ym}}</td>
+		<td align="left">{{no1.name}}</td>
+		<td align="right" style="padding-left:32px">{{no1.time}}</td>
+		<td align="left">{{no1.perc}}</td>
+	</tr>
+{% endfor %}
+</table>
+<br>
+<hr>
+
+<p class="medium">No.1s (monthly platforms)</p></br>
+<table>
+{% for no1 in no1data.platforms.monthly.no1s %}
 	<tr style="white-space: nowrap;">
 		<td align="right">{{no1.ym}}</td>
 		<td align="left">{{no1.name}}</td>
