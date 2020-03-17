@@ -354,10 +354,15 @@ def ptime_formadd(msg=[]):
                 msg=[m['error'],]
         else:
             msg=['Dates don\'t seem to match.',]
+    else:
+        form.date.data = datetime.datetime.now()
+        form.confirm_date.data = datetime.datetime.now()
+
     return render_template('ptform.html',
                            title='add PTime',
                            msg=msg,
-                           form=form)
+                           form=form,
+                           )
 
 
 @app.route('/ptime/add_stuff', methods=['POST'])
