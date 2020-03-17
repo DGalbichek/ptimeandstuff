@@ -67,11 +67,10 @@ from wtforms import StringField, FloatField, SelectField, IntegerField, DateFiel
 from wtforms.validators import DataRequired
 
 class PTForm(FlaskForm):
-    #game=SelectField('Game',coerce=int, validators=[DataRequired()])
     game=StringField('Game', id='game_autocomplete', validators=[DataRequired()])
     platform=SelectField('Platform',coerce=int, validators=[DataRequired()])
-    start = DateField('Start', format="%d/%m/%Y", validators=[DataRequired()])
-    end = DateField('End', format="%d/%m/%Y", validators=[DataRequired()])
+    date = DateField('Date', format="%d/%m/%Y", validators=[DataRequired()])
+    confirm_date = DateField('Confirm Date', format="%d/%m/%Y", validators=[DataRequired()])
     ptime = IntegerField('PTime', validators=[DataRequired()])
 
 class STForm(FlaskForm):
@@ -337,23 +336,24 @@ def no1spage():
 def ptime_formadd(msg=[]):
     ptdb=ptimedb.PTimeDb()
     form = PTForm()
-    #form.game.choices=[(x[2],x[0]) for x in ptdb.list('game')]
-    #form.game.choices.insert(0, (0, '---'))
     form.platform.choices=[(x[2],x[0]) for x in ptdb.list('platform')]
     form.platform.choices.insert(0, (0, '---'))
     ptdb.db.close()
 
     if form.validate_on_submit():
-        ptdb=ptimedb.PTimeDb()
-        m=ptdb.addPTime(form.game.data,form.platform.data,
-                        form.start.data.strftime('%d/%m/%y'),form.end.data.strftime('%d/%m/%y'),
-                        form.ptime.data)
-        ptdb.db.close()
-        if 'duna' in m:
-            msg="""<p class="larger">"""+m['duna']+"""</p><br><a href="/ptime/add">+</a>"""
-            return msg
+        d = form.date.data.strftime('%d/%m/%y')
+        cd = form.confirm_date.data.strftime('%d/%m/%y')
+        if d==cd:
+            ptdb=ptimedb.PTimeDb()
+            m=ptdb.addPTime(form.game.data,form.platform.data,d,d,form.ptime.data)
+            ptdb.db.close()
+            if 'duna' in m:
+                msg="""<p class="larger">"""+m['duna']+"""</p><br><a href="/ptime/add">+</a>"""
+                return msg
+            else:
+                msg=[m['error'],]
         else:
-            msg=[m['error'],]
+            msg=['Dates don\'t seem to match.',]
     return render_template('ptform.html',
                            title='add PTime',
                            msg=msg,

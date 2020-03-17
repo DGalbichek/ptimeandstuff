@@ -54,18 +54,18 @@
 		</tr>
 
 		<tr>
-			<td class="medium" align="right">start:</td>
-			<td align="left">{{ form.start(size=12, class='larger datepicker', autocomplete='off') }}<br>
-				{% for error in form.start.errors %}
+			<td class="medium" align="right">date:</td>
+			<td align="left">{{ form.date(size=12, class='larger datepicker', autocomplete='off') }}<br>
+				{% for error in form.date.errors %}
 					<span style="color: red;">[{{ error }}]</span>
 				{% endfor %}
 			</td>
 		</tr>
 
 		<tr>
-			<td class="medium" align="right">end:</td>
-			<td align="left">{{ form.end(size=12, class='larger datepicker', autocomplete='off') }}<br>
-				{% for error in form.end.errors %}
+			<td class="medium" align="right">confirm date:</td>
+			<td align="left">{{ form.confirm_date(size=12, class='larger datepicker', autocomplete='off') }}<br>
+				{% for error in form.confirm_date.errors %}
 					<span style="color: red;">[{{ error }}]</span>
 				{% endfor %}
 			</td>
