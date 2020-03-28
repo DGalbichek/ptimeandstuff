@@ -1,0 +1,36 @@
+{% extends "ptimebase.html" %}
+
+{% block ptimecontent %}
+
+
+<p class="medium">Best months</p>
+<table>
+{% for m in strongestmonth %}
+	<tr style="white-space: nowrap;">
+		<td align="right">{{m.0}}</td>
+		<td align="left">{{m.1}}</td>
+		<td align="right" style="padding-left:32px">{{m.2}}</td>
+		<td align="left">({{m.3}})</td>
+	</tr>
+{% endfor %}
+</table>
+<br>
+<hr>
+
+
+{% for plat in platsmonths %}
+<p class="medium">{{plat.plat}}</p>
+<table>
+{% for m in plat.data %}
+	<tr style="white-space: nowrap;">
+		<td align="left">{{m.1}}</td>
+		<td align="right" style="padding-left:32px">{{m.0}}</td>
+	</tr>
+{% endfor %}
+</table>
+<br>
+<hr>
+{% endfor %}
+
+
+{% endblock %}
