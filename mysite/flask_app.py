@@ -435,7 +435,7 @@ def ptimesinglpage(msg=[]):
 
         taim=ptdb.list('playtime',what2={'game':form.game.data})
         taim.sort(key=lambda x:x[4], reverse=True)
-        pt=[x[:-1] for x in taim]
+        pt=[x[:-1] for x in taim][:50]
         tot=ptdb.top(what='platform',what2={'game':form.game.data,'gameperplatform':''})
 
         stats={}
