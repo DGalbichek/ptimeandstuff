@@ -10,6 +10,8 @@ import sqlite3
 WHAT = {'game':'games','platform':'platforms','tag':'tags'}
 BALANCERATIO = 0.5
 DAILYMUSICTARGET = 30
+DAILYLEARNTARGET = 15
+DAILYEXERCISETARGET = 15
 
 
 class PTimeDb():
@@ -261,7 +263,7 @@ class PTimeDb():
             highlights={'month':{},'year':{}}
 
             # months with data buildup
-            for m in ['balance','ratio','music','daily music','vg','bg','learn','daily learn','exercise','total','entries','titles']:
+            for m in ['balance','ratio','music','daily music','vg','bg','learn','daily learn','exercise','daily exercise','total','entries','titles']:
                 # row title
                 bal+="<tr>"
                 if m=='entries':
@@ -307,6 +309,11 @@ class PTimeDb():
                             ts.append(lea/monthrange(int(ym[:4]),int(ym[-2:]))[1])
                     elif m=='exercise':
                         ts.append(exe)
+                    elif m=='daily exercise':
+                        if bal_year=='this year' and ym==ymonths[-1]:
+                            ts.append(exe/datetime.datetime.now().day)
+                        else:
+                            ts.append(exe/monthrange(int(ym[:4]),int(ym[-2:]))[1])
                     elif m=='total':
                         ts.append(tot)
                     elif m=='entries':
@@ -357,6 +364,11 @@ class PTimeDb():
                         ts.append(sum([learning.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
                     else:
                         ts.append(sum([learning.get(ym,0) for ym in ymonths])/365)
+                elif m=='daily exercise':
+                    if bal_year=='this year':
+                        ts.append(sum([exercise.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
+                    else:
+                        ts.append(sum([exercise.get(ym,0) for ym in ymonths])/365)
                 else:
                     ts.append(ctot)
                     if m=='balance':
@@ -366,9 +378,15 @@ class PTimeDb():
                 # month cells
                 for nn,t in enumerate(ts):
                     bal+='<td align="right"'
-                    if (m=='balance' and t<0) or (m=='ratio' and t<BALANCERATIO and t>0) or (m=='daily music' and t<DAILYMUSICTARGET and t>0):
+                    if (m=='balance' and t<0) or (m=='ratio' and t<BALANCERATIO and t>0) or \
+                       (m=='daily music' and t<DAILYMUSICTARGET) or \
+                       (m=='daily learn' and t<DAILYLEARNTARGET) or \
+                       (m=='daily exercise' and t<DAILYEXERCISETARGET):
                         bal+=' style="background:red;"'
-                    elif (m=='balance' and t>0) or (m=='ratio' and t>=BALANCERATIO) or (m=='daily music' and t>=DAILYMUSICTARGET):
+                    elif (m=='balance' and t>0) or (m=='ratio' and t>=BALANCERATIO) or \
+                         (m=='daily music' and t>=DAILYMUSICTARGET) or \
+                         (m=='daily learn' and t>=DAILYLEARNTARGET) or \
+                         (m=='daily exercise' and t>=DAILYEXERCISETARGET):
                         bal+=' style="background:lightgreen;"'
                     elif ctot==0:
                         pass
@@ -379,7 +397,7 @@ class PTimeDb():
                         bal+="{0:.2f}".format(t)
                     elif (m=='entries' or m=='titles') and t>0:
                         bal+=str(int(t))
-                    elif (m=='daily music' or m=='daily learn') and t>0:
+                    elif (m=='daily music' or m=='daily learn' or m=='daily exercise') and t>0:
                         bal+=str(int(t))+'m'
                     elif t!=0:
                         bal+=self._value(t,sep='<br>')
@@ -403,7 +421,9 @@ class PTimeDb():
                 high+=';">'+self._value(highlights['year']['balance'], sep=' ')
                 high+=' ('+"{0:.2f}".format(highlights['year']['ratio'])+')</font></h1>'
                 high+='<h1>target ratio: '+"{0:.2f}".format(BALANCERATIO)+'</h1>'
-                high+='<h1>daily music target: ' + str(DAILYMUSICTARGET) + 'm </h1><hr>'
+                high+='<h1>daily music target: ' + str(DAILYMUSICTARGET) + 'm </h1>'
+                high+='<h1>daily learn target: ' + str(DAILYLEARNTARGET) + 'm </h1>'
+                high+='<h1>daily exercise target: ' + str(DAILYEXERCISETARGET) + 'm </h1><hr>'
 
         return high+bal
 
