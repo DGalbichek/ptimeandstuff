@@ -336,17 +336,20 @@ def no1spage():
 def platspage():
     ptdb=ptimedb.PTimeDb()
     platsmonths = {}
+    pmpts = {}
     strongestmonth = []
     for platform in ptdb.list('platform'):
         platmonths = ptdb.list('playtime',what2={'platform':platform[0],'aggr':'monthly'})
+        pmpt = ptdb.monthly_table(platmonths)
+        pmpts[platform[0]] = pmpt
         platmonths.sort(key=lambda x: x[0], reverse=True)
         strongestmonth.append((platform[0], platmonths[0][0], platmonths[0][1]))
         platmonths = [(str(int(x[0]/60))+'h '+str(x[0]%60)+'m',x[1]) for x in platmonths[:5]]
         platsmonths[platform[0]]=platmonths
-
+        
     strongestmonth.sort(key=lambda x: x[1], reverse=True)
     strongestmonth=[(n+1,x[0],str(int(x[1]/60))+'h '+str(x[1]%60)+'m',x[2]) for n,x in enumerate(strongestmonth)]
-    platsmonths = [{'plat':x[1],'data':platsmonths[x[1]]} for x in strongestmonth]
+    platsmonths = [{'plat':x[1],'data':platsmonths[x[1]], 'mpt':pmpts[x[1]]} for x in strongestmonth]
 
     ptdb.db.close()
     return render_template('ptimeplats.html',
