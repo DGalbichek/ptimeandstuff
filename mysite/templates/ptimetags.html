@@ -13,19 +13,14 @@
 		</tr>
 	{% endfor %}
 	</table>
-{% endfor %}
-<hr>
 
-{% if tmpt %}
-    {% for x in tmpt %}
-    <p class="medium">{{x.0}}</p>
     <div>
+    <br>
     {% autoescape false %}
-        {{ x.1 }}
+        {{ t.mpt }}
     {% endautoescape %}
     </div>
-    {% endfor %}
-{% endif %}
-
+<hr>
+{% endfor %}
 
 {% endblock %}
