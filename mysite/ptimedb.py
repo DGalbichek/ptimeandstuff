@@ -551,6 +551,8 @@ class PTimeDb():
         if what=='playtime':
             if not what2:
                 return self.cursor.execute('''SELECT * FROM playtime ORDER BY id DESC LIMIT 20;''').fetchall()
+            #elif 'count' in what2:
+            #    return self.cursor.execute('''SELECT COUNT(*) FROM playtime;''').fetchall()
             else:
                 aaa=False
                 if 'aggr' in what2:
@@ -562,7 +564,9 @@ class PTimeDb():
                             sql+='COUNT(ptime)'
                     else:
                         sql+='SUM(ptime)'
-                    if what2['aggr']=='yearly':
+                    if what2['aggr']=='none':
+                        pass
+                    elif what2['aggr']=='yearly':
                         sql+=' AS mptime, strftime("%Y", t_start) AS yrmth '
                     else:
                         sql+=' AS mptime, strftime("%Y-%m", t_start) AS yrmth '
@@ -595,7 +599,7 @@ class PTimeDb():
                     sql+='''strftime('%Y-%m', t_end) = \'''' + what2['ym'] + '\''
                 elif 'y' in what2:
                     sql+='''strftime('%Y', t_end) = \'''' + what2['y'] + '\''
-                if 'aggr' in what2:
+                if 'aggr' in what2 and what2['aggr']!='none':
                     if what2['aggr']=='yearly':
                         sql+=''' GROUP BY strftime("%Y", t_start);'''
                     else:

@@ -2,6 +2,32 @@
 
 {% block ptimecontent %}
 
+<table>
+	<tbody>
+		<tr>
+			<td style="padding-right:8px" align="right">days:</td>
+			<td align="left">{{dbstats.daysgoing}}</td>
+		</tr>
+		<tr>
+			<td style="padding-right:8px" align="right">entries:</td>
+			<td align="left">{{dbstats.noofentries}}</td>
+		</tr>
+		<tr>
+			<td style="padding-right:8px" align="right">games:</td>
+			<td align="left">{{dbstats.noofgames}}</td>
+		</tr>
+		<tr>
+			<td style="padding-right:8px" align="right">platforms:</td>
+			<td align="left">{{dbstats.noofplatforms}}</td>
+		</tr>
+		<tr>
+			<td style="padding-right:8px" align="right">tags:</td>
+			<td align="left">{{dbstats.nooftags}}</td>
+		</tr>
+	</tbody>
+</table>
+			
+<hr>
 {% for t in pt %}<p>{{t}}</p>{% endfor %}
 
 <p class="medium">All titles:</p>

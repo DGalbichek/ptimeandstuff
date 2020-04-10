@@ -430,16 +430,24 @@ def ptime_jsonadd():
 def ptimeinfopage():
     ptdb=ptimedb.PTimeDb()
     pt=[x[:-1] for x in ptdb.list('playtime')]
+    ptc=ptdb.list('playtime', what2={'aggr':'none', 'count':''})
     games=[(x[2],x[0]) for x in ptdb.list('game')]
     platforms=[(x[2],x[0]) for x in ptdb.list('platform')]
     tags=[(x[2],x[0]) for x in ptdb.list('tag')]
     ptdb.db.close()
+    start = datetime.datetime(2017, 1, 1)
+    dbstats = {'daysgoing': (datetime.datetime.now()-start).days+1,
+               'noofentries': ptc[0][0],
+               'noofgames': len(games),
+               'noofplatforms': len(platforms),
+               'nooftags': len(tags),}
     return render_template('ptimeinfo.html',
                            title='ptime info',
                            pt=pt,
                            games=games,
                            platforms=platforms,
-                           tags=tags
+                           tags=tags,
+                           dbstats=dbstats
                            )
 
 
