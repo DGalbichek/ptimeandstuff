@@ -239,6 +239,7 @@ class PTimeDb():
                     music[gt[1]]+=gt[0]
 
         boardgames={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Board Game','aggr':'monthly','years':yearsback}) if bal_year in x[1]}
+        diy={x[1]:x[0] for x in self.list('playtime',what2={'platform':'DIY','aggr':'monthly','years':yearsback}) if bal_year in x[1]}
         learning={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Learning','aggr':'monthly','years':yearsback}) if bal_year in x[1]}
         exercise={x[1]:x[0] for x in self.list('playtime',what2={'platform':'Exercise','aggr':'monthly','years':yearsback}) if bal_year in x[1]}
 
@@ -248,13 +249,13 @@ class PTimeDb():
         titles['total']=[x[0] for x in self.list('playtime',what2={'aggr':'yearly','count':'titles','years':yearsback}) if bal_year in x[1]][0]
 
 
-        return ymonths, music, boardgames, learning, exercise, allgames, entries, titles
+        return ymonths, music, boardgames, diy, learning, exercise, allgames, entries, titles
 
         
     def balance(self):
         bal=''
         for bal_year in ['this year', 'last year',]:
-            ymonths, music, boardgames, learning, exercise, allgames, entries, titles = self._balance_gather(bal_year=bal_year)
+            ymonths, music, boardgames, diyy, learning, exercise, allgames, entries, titles = self._balance_gather(bal_year=bal_year)
 
             ## TABLE
             # header
@@ -263,7 +264,7 @@ class PTimeDb():
             highlights={'month':{},'year':{}}
 
             # months with data buildup
-            for m in ['balance','ratio','music','daily music','vg','bg','learn','daily learn','exercise','daily exercise','total','entries','titles']:
+            for m in ['balance','ratio','music','daily music','learn','daily learn','exercise','daily exercise','bg','diy','vg','total','entries','titles']:
                 # row title
                 bal+="<tr>"
                 if m=='entries':
@@ -273,11 +274,12 @@ class PTimeDb():
                 ts=[]
                 for ym in ymonths:
                     mus=music.get(ym,0)
-                    boa=boardgames.get(ym,0)
                     lea=learning.get(ym,0)
                     exe=exercise.get(ym,0)
+                    boa=boardgames.get(ym,0)
+                    diy=diyy.get(ym,0)
                     tot=allgames.get(ym,0)
-                    vid=tot-mus-boa-lea-exe
+                    vid=tot-mus-lea-exe-boa-diy
 
                     if m=='balance':
                         ts.append((mus+lea+exe)/BALANCERATIO-vid)
@@ -296,10 +298,6 @@ class PTimeDb():
                             ts.append(mus/datetime.datetime.now().day)
                         else:
                             ts.append(mus/monthrange(int(ym[:4]),int(ym[-2:]))[1])
-                    elif m=='vg':
-                        ts.append(vid)
-                    elif m=='bg':
-                        ts.append(boa)
                     elif m=='learn':
                         ts.append(lea)
                     elif m=='daily learn':
@@ -314,6 +312,12 @@ class PTimeDb():
                             ts.append(exe/datetime.datetime.now().day)
                         else:
                             ts.append(exe/monthrange(int(ym[:4]),int(ym[-2:]))[1])
+                    elif m=='bg':
+                        ts.append(boa)
+                    elif m=='diy':
+                        ts.append(diy)
+                    elif m=='vg':
+                        ts.append(vid)
                     elif m=='total':
                         ts.append(tot)
                     elif m=='entries':
