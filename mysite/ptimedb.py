@@ -8,7 +8,7 @@ import sqlite3
 
 
 WHAT = {'game':'games','platform':'platforms','tag':'tags'}
-BALANCERATIO = 0.5
+BALANCERATIOTARGET = 0.5
 DAILYMUSICTARGET = 30
 DAILYLEARNTARGET = 15
 DAILYEXERCISETARGET = 15
@@ -94,6 +94,13 @@ class PTimeDb():
             return ym[:5]+str(int(ym[-2:])+1).zfill(2)
 
 
+    def _dym(self,ym):
+        if ym[-2:]=='01':
+            return str(int(ym[:4])-1)+'-12'
+        else:
+            return ym[:5]+str(int(ym[-2:])-1).zfill(2)
+
+
     ##
     ##  CACHING
     ##
@@ -126,6 +133,24 @@ class PTimeDb():
     def listCachedData(self):
         return [x[0] for x in self.cursor.execute('''SELECT data_key FROM cached_data;''').fetchall()]
 
+
+    def setRules(self, ym, json, web=False):
+        self.setCachedData('rules-for-'+ym, json)
+        return {'duna':'Done.'} if web else {}
+
+
+    def getRules(self, ym):
+        while True:
+            if int(ym[:4]) < 2017:
+                return {'ym': ym,
+                        'BALANCERATIOTARGET': 0,
+                        'DAILYMUSICTARGET': 0,
+                        'DAILYLEARNTARGET': 0,
+                        'DAILYEXERCISETARGET': 0}
+            r = self.getCachedData('rules-for-'+ym,{},singl=True)
+            ym = self._dym(ym)
+            if r:
+                return r
 
     ##
     ##  DATA
@@ -282,7 +307,7 @@ class PTimeDb():
                     vid=tot-mus-lea-exe-boa-diy
 
                     if m=='balance':
-                        ts.append((mus+lea+exe)/BALANCERATIO-vid)
+                        ts.append((mus+lea+exe)/BALANCERATIOTARGET-vid)
                     elif m=='ratio':
                         if vid==0:
                             if mus+lea+exe > 0:
@@ -382,12 +407,12 @@ class PTimeDb():
                 # month cells
                 for nn,t in enumerate(ts):
                     bal+='<td align="right"'
-                    if (m=='balance' and t<0) or (m=='ratio' and t<BALANCERATIO and t>0) or \
+                    if (m=='balance' and t<0) or (m=='ratio' and t<BALANCERATIOTARGET and t>0) or \
                        (m=='daily music' and t<DAILYMUSICTARGET) or \
                        (m=='daily learn' and t<DAILYLEARNTARGET) or \
                        (m=='daily exercise' and t<DAILYEXERCISETARGET):
                         bal+=' style="background:red;"'
-                    elif (m=='balance' and t>0) or (m=='ratio' and t>=BALANCERATIO) or \
+                    elif (m=='balance' and t>0) or (m=='ratio' and t>=BALANCERATIOTARGET) or \
                          (m=='daily music' and t>=DAILYMUSICTARGET) or \
                          (m=='daily learn' and t>=DAILYLEARNTARGET) or \
                          (m=='daily exercise' and t>=DAILYEXERCISETARGET):
@@ -411,7 +436,7 @@ class PTimeDb():
 
             if bal_year == 'this year':
                 high='<h1>curr month: <font style="background:'
-                high+='red' if highlights['month']['ratio']<BALANCERATIO else 'lightgreen'
+                high+='red' if highlights['month']['ratio']<BALANCERATIOTARGET else 'lightgreen'
                 high+=';">'+self._value(highlights['month']['balance'], sep=' ')
                 high+=' ('+"{0:.2f}".format(highlights['month']['ratio'])+')</font>'
                 if 'dynamics' in highlights['month']:
@@ -421,10 +446,10 @@ class PTimeDb():
                         high+=highlights['month']['rank']
                     high+='</font>'
                 high+='</h1><h1>this year: <font style="background:'
-                high+='red' if highlights['year']['ratio']<BALANCERATIO else 'lightgreen'
+                high+='red' if highlights['year']['ratio']<BALANCERATIOTARGET else 'lightgreen'
                 high+=';">'+self._value(highlights['year']['balance'], sep=' ')
                 high+=' ('+"{0:.2f}".format(highlights['year']['ratio'])+')</font></h1>'
-                high+='<h1>target ratio: '+"{0:.2f}".format(BALANCERATIO)+'</h1>'
+                high+='<h1>target ratio: '+"{0:.2f}".format(BALANCERATIOTARGET)+'</h1>'
                 high+='<h1>daily music target: ' + str(DAILYMUSICTARGET) + 'm </h1>'
                 high+='<h1>daily learn target: ' + str(DAILYLEARNTARGET) + 'm </h1>'
                 high+='<h1>daily exercise target: ' + str(DAILYEXERCISETARGET) + 'm </h1><hr>'

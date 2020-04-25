@@ -418,6 +418,11 @@ def ptime_jsonadd():
                 r=json.dumps(ptdb.addPTime(ta['game'],ta['platform'],ta['start'],ta['end'],ta['ptime']))
             except:
                 r='What is this stuff?'
+        elif content['davidsstuff']=='rules':
+            if 'rules' in content:
+                r=json.dumps(ptdb.setRules(content['rules']['ym'], content['rules'], web=True))
+            else:
+                r='What is this stuff?'
     else:
         #print('baka')
         r='What is this stuff?'
