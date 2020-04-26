@@ -143,7 +143,7 @@ class PTimeDb():
         while True:
             if int(ym[:4]) < 2017:
                 return {'ym': ym,
-                        'BALANCERATIOTARGET': 0,
+                        'BALANCERATIOTARGET': 1,
                         'DAILYMUSICTARGET': 0,
                         'DAILYLEARNTARGET': 0,
                         'DAILYEXERCISETARGET': 0}
@@ -273,14 +273,36 @@ class PTimeDb():
         titles={x[1]:x[0] for x in self.list('playtime',what2={'aggr':'monthly','count':'titles','years':yearsback}) if bal_year in x[1]}
         titles['total']=[x[0] for x in self.list('playtime',what2={'aggr':'yearly','count':'titles','years':yearsback}) if bal_year in x[1]][0]
 
+        rules = {ym: self.getRules(ym) for ym in ymonths}
 
-        return ymonths, music, boardgames, diy, learning, exercise, allgames, entries, titles
+        return ymonths, music, boardgames, diy, learning, exercise, allgames, entries, titles, rules
 
         
     def balance(self):
         bal=''
+        ruleabbs = {'tgtr': 'BALANCERATIOTARGET', 'tgtdm': 'DAILYMUSICTARGET',
+                    'tgtdl': 'DAILYLEARNTARGET', 'tgtde': 'DAILYEXERCISETARGET'}
+
         for bal_year in ['this year', 'last year',]:
-            ymonths, music, boardgames, diyy, learning, exercise, allgames, entries, titles = self._balance_gather(bal_year=bal_year)
+            ymonths, music, boardgames, diyy, learning, exercise, allgames, entries, titles, rules = self._balance_gather(bal_year=bal_year)
+            ## rules
+            rul_tgtr = [rules[x]['BALANCERATIOTARGET'] for x in ymonths]
+            rul_tgtdm = [rules[x]['DAILYMUSICTARGET'] for x in ymonths]
+            rul_tgtdl = [rules[x]['DAILYLEARNTARGET'] for x in ymonths]
+            rul_tgtde = [rules[x]['DAILYEXERCISETARGET'] for x in ymonths]
+            for rul in [rul_tgtr, rul_tgtdm, rul_tgtdl, rul_tgtde]:
+                ctot=sum(rul)
+                cavg=ctot/len(rul)
+
+                for a in range(12-len(rul)):
+                    rul.append(0)
+
+                if bal_year=='this year':
+                    rul.append(sum(rul)/datetime.datetime.now().month)
+                else:
+                    rul.append(sum(rul)/12)
+
+                rul.append(cavg)
 
             ## TABLE
             # header
@@ -289,7 +311,8 @@ class PTimeDb():
             highlights={'month':{},'year':{}}
 
             # months with data buildup
-            for m in ['balance','ratio','music','daily music','learn','daily learn','exercise','daily exercise','bg','diy','vg','total','entries','titles']:
+            for m in ['balance','ratio','tgtr','music','daily music','tgtdm','learn','daily learn','tgtdl',
+                      'exercise','daily exercise','tgtde','bg','diy','vg','total','entries','titles']:
                 # row title
                 bal+="<tr>"
                 if m=='entries':
@@ -307,7 +330,7 @@ class PTimeDb():
                     vid=tot-mus-lea-exe-boa-diy
 
                     if m=='balance':
-                        ts.append((mus+lea+exe)/BALANCERATIOTARGET-vid)
+                        ts.append((mus+lea+exe)/rules[ym]['BALANCERATIOTARGET']-vid)
                     elif m=='ratio':
                         if vid==0:
                             if mus+lea+exe > 0:
@@ -349,6 +372,8 @@ class PTimeDb():
                         ts.append(entries.get(ym,0))
                     elif m=='titles':
                         ts.append(titles.get(ym,0))
+                    elif m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde':
+                        ts.append(rules[ym][ruleabbs[m]])
                     else:
                         pass
 
@@ -398,6 +423,11 @@ class PTimeDb():
                         ts.append(sum([exercise.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
                     else:
                         ts.append(sum([exercise.get(ym,0) for ym in ymonths])/365)
+                elif m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde':
+                    if bal_year=='this year':
+                        ts.append(sum([rules[ym][ruleabbs[m]] for ym in ymonths])/datetime.datetime.now().month)
+                    else:
+                        ts.append(sum([rules[ym][ruleabbs[m]] for ym in ymonths])/12)
                 else:
                     ts.append(ctot)
                     if m=='balance':
@@ -407,26 +437,31 @@ class PTimeDb():
                 # month cells
                 for nn,t in enumerate(ts):
                     bal+='<td align="right"'
-                    if (m=='balance' and t<0) or (m=='ratio' and t<BALANCERATIOTARGET and t>0) or \
-                       (m=='daily music' and t<DAILYMUSICTARGET) or \
-                       (m=='daily learn' and t<DAILYLEARNTARGET) or \
-                       (m=='daily exercise' and t<DAILYEXERCISETARGET):
+                    if (m=='balance' and t<0) or (m=='ratio' and t<rul_tgtr[nn] and t>0) or \
+                       (m=='daily music' and t<rul_tgtdm[nn]) or \
+                       (m=='daily learn' and t<rul_tgtdl[nn]) or \
+                       (m=='daily exercise' and t<rul_tgtde[nn]):
                         bal+=' style="background:red;"'
-                    elif (m=='balance' and t>0) or (m=='ratio' and t>=BALANCERATIOTARGET) or \
-                         (m=='daily music' and t>=DAILYMUSICTARGET) or \
-                         (m=='daily learn' and t>=DAILYLEARNTARGET) or \
-                         (m=='daily exercise' and t>=DAILYEXERCISETARGET):
+                    elif (m=='balance' and t>0) or (m=='ratio' and t>=rul_tgtr[nn]) or \
+                         (m=='daily music' and t>=rul_tgtdm[nn]) or \
+                         (m=='daily learn' and t>=rul_tgtdl[nn]) or \
+                         (m=='daily exercise' and t>=rul_tgtde[nn]):
                         bal+=' style="background:lightgreen;"'
+                    elif (m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde') and nn<12 and t!=0 and t>cavg:
+                        bal+=' style="background:yellow;"'
+                    elif m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde':
+                        bal+=' style="background:lightyellow;"'
                     elif ctot==0:
                         pass
                     elif nn<12 and t!=0 and t>=cavg:
                         bal+=' style="background:lightblue;"'
                     bal+='>'
-                    if m=='ratio' and t>0:
+                    if (m=='ratio' or m=='tgtr') and t>0:
                         bal+="{0:.2f}".format(t)
                     elif (m=='entries' or m=='titles') and t>0:
                         bal+=str(int(t))
-                    elif (m=='daily music' or m=='daily learn' or m=='daily exercise') and t>0:
+                    elif ((m=='daily music' or m=='daily learn' or m=='daily exercise') and t>0) or \
+                         ((m=='tgtdm' or m=='tgtdl' or m=='tgtde') and ((bal_year == 'this year' and nn<datetime.datetime.now().month) or bal_year == 'last year')):
                         bal+=str(int(t))+'m'
                     elif t!=0:
                         bal+=self._value(t,sep='<br>')
@@ -435,8 +470,9 @@ class PTimeDb():
             bal+='</tbody></table>'
 
             if bal_year == 'this year':
+                thismonth=datetime.datetime.now().strftime('%Y-%m')
                 high='<h1>curr month: <font style="background:'
-                high+='red' if highlights['month']['ratio']<BALANCERATIOTARGET else 'lightgreen'
+                high+='red' if highlights['month']['ratio']<rules[thismonth]['BALANCERATIOTARGET'] else 'lightgreen'
                 high+=';">'+self._value(highlights['month']['balance'], sep=' ')
                 high+=' ('+"{0:.2f}".format(highlights['month']['ratio'])+')</font>'
                 if 'dynamics' in highlights['month']:
@@ -446,13 +482,15 @@ class PTimeDb():
                         high+=highlights['month']['rank']
                     high+='</font>'
                 high+='</h1><h1>this year: <font style="background:'
-                high+='red' if highlights['year']['ratio']<BALANCERATIOTARGET else 'lightgreen'
+                high+='red' if highlights['year']['ratio']<rul_tgtr[-1] else 'lightgreen'
                 high+=';">'+self._value(highlights['year']['balance'], sep=' ')
                 high+=' ('+"{0:.2f}".format(highlights['year']['ratio'])+')</font></h1>'
-                high+='<h1>target ratio: '+"{0:.2f}".format(BALANCERATIOTARGET)+'</h1>'
-                high+='<h1>daily music target: ' + str(DAILYMUSICTARGET) + 'm </h1>'
-                high+='<h1>daily learn target: ' + str(DAILYLEARNTARGET) + 'm </h1>'
-                high+='<h1>daily exercise target: ' + str(DAILYEXERCISETARGET) + 'm </h1><hr>'
+                mostrecentrules = self.getRules(thismonth)
+                high+='<hr><p>rules since: '+mostrecentrules['ym']+'</p>'
+                high+='<h1>target ratio: '+"{0:.2f}".format(mostrecentrules['BALANCERATIOTARGET'])+'</h1>'
+                high+='<h1>daily music target: ' + str(mostrecentrules['DAILYMUSICTARGET']) + 'm </h1>'
+                high+='<h1>daily learn target: ' + str(mostrecentrules['DAILYLEARNTARGET']) + 'm </h1>'
+                high+='<h1>daily exercise target: ' + str(mostrecentrules['DAILYEXERCISETARGET']) + 'm </h1><hr>'
 
         return high+bal
 
