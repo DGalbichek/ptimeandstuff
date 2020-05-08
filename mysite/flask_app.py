@@ -190,15 +190,7 @@ def ptimepage():
     curryear=ym[:-3]
     curryearmonth=calendar.month_name[int(ym[-2:])]+' '+curryear
 
-    if getfromcache:
-        l2=ptdb.getCachedData('monthly-games-'+ym,[],singl=True)
-        l4=ptdb.getCachedData('monthly-platforms-'+ym,[],singl=True)
-        l1=ptdb.getCachedData('yearly-games-'+curryear,[],singl=True)
-        l3=ptdb.getCachedData('yearly-platforms-'+curryear,[],singl=True)
-        l5=ptdb.getCachedData('alltime-games',[],singl=True)
-        l6=ptdb.getCachedData('alltime-platforms',[],singl=True)
-        l7=ptdb.getCachedData('alltime-impressions',[],singl=True)
-    else:
+    if not getfromcache:
         l2=ptdb.top(what2={'ym':ym,'gameperplatform':''})
         ptdb.setCachedData('monthly-games-'+ym,l2)
 
@@ -220,8 +212,16 @@ def ptimepage():
         l7=m(30,ptdb.top(what2={'impressions':''}),False)
         ptdb.setCachedData('alltime-impressions',l7)
 
-    l1=m(20,l1)
-    l3=m(10,l3,False)
+    l2=ptdb.getCachedData('monthly-games-'+ym,[],singl=True)
+    l4=ptdb.getCachedData('monthly-platforms-'+ym,[],singl=True)
+    l1=ptdb.getCachedData('yearly-games-'+curryear,[],singl=True)
+    l3=ptdb.getCachedData('yearly-platforms-'+curryear,[],singl=True)
+    l5=ptdb.getCachedData('alltime-games',[],singl=True)
+    l6=ptdb.getCachedData('alltime-platforms',[],singl=True)
+    l7=ptdb.getCachedData('alltime-impressions',[],singl=True)
+
+    l1['content']=m(20,l1['content'])
+    l3['content']=m(10,l3['content'],False)
 
     mtaim=ptdb.list('playtime',what2={'aggr':'monthly'})
     mpt=ptdb.monthly_table(mtaim)
@@ -301,9 +301,9 @@ def no1spage():
             bigrunners = {}
             yms = _ym_up_til_now()[::-1] if when=='monthly' else _y_up_til_now()[::-1]
             for ym in yms:
-                curr = ptdb.getCachedData(when+'-'+what+'-'+ym, [])
+                curr = ptdb.getCachedData(when+'-'+what+'-'+ym, [], True)
                 if curr:
-                    curr = m(1,curr[0][1])
+                    curr = m(1,curr['content'])
                     if len(curr) > 1:
                         no1s.append({
                             'ym': ym,
@@ -483,10 +483,10 @@ def ptimesinglpage(msg=[]):
         tot=ptdb.top(what='platform',what2={'game':form.game.data,'gameperplatform':''})
 
         stats={}
-        alltimer=[x for x in ptdb.getCachedData('alltime-games',[],singl=True) if gamename in x['name']]
+        alltimer=[x for x in ptdb.getCachedData('alltime-games',[],singl=True)['content'] if gamename in x['name']]
         if alltimer:
             stats['alltimerank']=alltimer[0]['rank']
-        topimpressions=[x for x in ptdb.getCachedData('alltime-impressions',[],singl=True) if gamename in x['name']]
+        topimpressions=[x for x in ptdb.getCachedData('alltime-impressions',[],singl=True)['content'] if gamename in x['name']]
         if topimpressions:
             stats['topimpressions']=topimpressions
         ptdb.db.close()

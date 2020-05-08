@@ -24,9 +24,9 @@
 <hr>
 
 	{% for t in tops %}
-		<p class="medium">{{ t.title }}</p></br>
+		<p class="medium">{{ t.title }}</p>
 		<table>
-		{% for tl in t.list %}
+		{% for tl in t.list.content %}
 			<tr style="white-space: nowrap;">
 			<td align="right" style="padding-right:8px">{{tl.rank}}</td>
 			<td align="right">{{tl.yearmonth}}</td>
@@ -36,6 +36,7 @@
 			</tr>
 		{% endfor %}
 		</table>
+		<div style="float:center"><i>(cached on {{t.list.setCacheDate}})</i></div>
 		<br>
 	{% endfor %}
 

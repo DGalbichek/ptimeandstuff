@@ -105,13 +105,14 @@ class PTimeDb():
     ##  CACHING
     ##
     def setCachedData(self,dk,cont):
+        tocache = {'content': cont, 'setCacheDate': datetime.datetime.now().strftime('%Y-%b-%d %H:%M')}
         if not self.cursor.execute('''SELECT data_key FROM cached_data
                                 WHERE data_key=?;''',(dk,)).fetchone():
             self.cursor.execute('''INSERT INTO cached_data(data_key, data_content)
-                                VALUES (?,?);''', (dk,json.dumps(cont)))
+                                VALUES (?,?);''', (dk,json.dumps(tocache)))
         elif dk:
             self.cursor.execute('''UPDATE cached_data SET data_content=?
-                                WHERE data_key=?;''', (json.dumps(cont),dk))
+                                WHERE data_key=?;''', (json.dumps(tocache),dk))
         self.db.commit()
 
 
