@@ -151,7 +151,7 @@ class PTimeDb():
             r = self.getCachedData('rules-for-'+ym,{},singl=True)
             ym = self._dym(ym)
             if r:
-                return r
+                return r['content']
 
     ##
     ##  DATA
