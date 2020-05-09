@@ -231,13 +231,13 @@ def ptimepage():
     mtc=ptdb.monthly_table(mtcount, timedata=False, nototal=True)
 
     tops=[
-        {'title': str(len(l2)-1)+' games in '+curryearmonth, 'list': l2},
-        {'title': str(len(l4))+' platforms in '+curryearmonth, 'list': l4},
-        {'title': 'Top '+str(len(l1)-1)+' games in '+curryear, 'list': l1},
-        {'title': 'Top '+str(len(l3))+' platforms in '+curryear, 'list': l3},
-        {'title': 'Top '+str(len(l7))+' impressions of all time (well, 2017-)', 'list': l7},
-        {'title': 'Top '+str(len(l5)-1)+' games of all time (well, 2017-)', 'list': l5},
-        {'title': 'Top '+str(len(l6))+' platforms of all time (well, 2017-)', 'list': l6},
+        {'title': str(len(l2['content'])-1)+' games in '+curryearmonth, 'list': l2},
+        {'title': str(len(l4['content']))+' platforms in '+curryearmonth, 'list': l4},
+        {'title': 'Top '+str(len(l1['content'])-1)+' games in '+curryear, 'list': l1},
+        {'title': 'Top '+str(len(l3['content']))+' platforms in '+curryear, 'list': l3},
+        {'title': 'Top '+str(len(l7['content']))+' impressions of all time (well, 2017-)', 'list': l7},
+        {'title': 'Top '+str(len(l5['content'])-1)+' games of all time (well, 2017-)', 'list': l5},
+        {'title': 'Top '+str(len(l6['content']))+' platforms of all time (well, 2017-)', 'list': l6},
         ]
 
     ptdb.db.close()
