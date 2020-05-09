@@ -3,6 +3,21 @@
 {% block ptimecontent %}
 
 
+		<p class="medium">Platforms of all time</p>
+		<table>
+		{% for tl in alltimeplats.content %}
+			<tr style="white-space: nowrap;">
+			<td align="right" style="padding-right:8px">{{tl.rank}}</td>
+			<td align="right">{{tl.yearmonth}}</td>
+			<td align="left">{{tl.name}}</td>
+			<td align="right" style="padding-left:32px">{{tl.time}}</td>
+			<td align="left">{{tl.perc}}</td>
+			</tr>
+		{% endfor %}
+		</table>
+		<div style="float:center"><i>(cached on {{alltimeplats.setCacheDate}})</i></div>
+
+
 <p class="medium">Best months</p>
 <table>
 {% for m in strongestmonth %}
