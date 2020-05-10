@@ -190,35 +190,36 @@ def ptimepage():
     curryear=ym[:-3]
     curryearmonth=calendar.month_name[int(ym[-2:])]+' '+curryear
 
-    if not getfromcache:
+    if getfromcache:
+        l2=ptdb.getCachedData('monthly-games-'+ym,[],singl=True)
+        l4=ptdb.getCachedData('monthly-platforms-'+ym,[],singl=True)
+        l1=ptdb.getCachedData('yearly-games-'+curryear,[],singl=True)
+        l3=ptdb.getCachedData('yearly-platforms-'+curryear,[],singl=True)
+        l5=ptdb.getCachedData('alltime-games',[],singl=True)
+        l6=ptdb.getCachedData('alltime-platforms',[],singl=True)
+        l7=ptdb.getCachedData('alltime-impressions',[],singl=True)
+
+    else:
         l2=ptdb.top(what2={'ym':ym,'gameperplatform':''})
-        ptdb.setCachedData('monthly-games-'+ym,l2)
+        l2=ptdb.setCachedData('monthly-games-'+ym,l2)
 
         l4=ptdb.top(what='platform',what2={'ym':form.ym.data})[:-1]
-        ptdb.setCachedData('monthly-platforms-'+ym,l4)
+        l4=ptdb.setCachedData('monthly-platforms-'+ym,l4)
 
         l1=ptdb.top(what2={'y':curryear,'gameperplatform':''})
-        ptdb.setCachedData('yearly-games-'+curryear,l1)
+        l1=ptdb.setCachedData('yearly-games-'+curryear,l1)
 
         l3=ptdb.top(what='platform',what2={'y':curryear})
-        ptdb.setCachedData('yearly-platforms-'+curryear,l3)
+        l3=ptdb.setCachedData('yearly-platforms-'+curryear,l3)
 
         l5=m(40,ptdb.top(what2={}))
-        ptdb.setCachedData('alltime-games',l5)
+        l5=ptdb.setCachedData('alltime-games',l5)
 
         l6=m(20,ptdb.top(what='platform',what2={}),False)
-        ptdb.setCachedData('alltime-platforms',l6)
+        l6=ptdb.setCachedData('alltime-platforms',l6)
 
         l7=m(30,ptdb.top(what2={'impressions':''}),False)
-        ptdb.setCachedData('alltime-impressions',l7)
-
-    l2=ptdb.getCachedData('monthly-games-'+ym,[],singl=True)
-    l4=ptdb.getCachedData('monthly-platforms-'+ym,[],singl=True)
-    l1=ptdb.getCachedData('yearly-games-'+curryear,[],singl=True)
-    l3=ptdb.getCachedData('yearly-platforms-'+curryear,[],singl=True)
-    l5=ptdb.getCachedData('alltime-games',[],singl=True)
-    l6=ptdb.getCachedData('alltime-platforms',[],singl=True)
-    l7=ptdb.getCachedData('alltime-impressions',[],singl=True)
+        l7=ptdb.setCachedData('alltime-impressions',l7)
 
     l1['content']=m(20,l1['content'])
     l3['content']=m(10,l3['content'],False)

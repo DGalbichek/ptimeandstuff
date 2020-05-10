@@ -114,6 +114,7 @@ class PTimeDb():
             self.cursor.execute('''UPDATE cached_data SET data_content=?
                                 WHERE data_key=?;''', (json.dumps(tocache),dk))
         self.db.commit()
+        return tocache
 
 
     def getCachedData(self,dk,novar=[],singl=False):
