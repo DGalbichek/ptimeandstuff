@@ -311,10 +311,12 @@ class PTimeDb():
             bal+="<h1>"+bal_year+"</h1>"
             bal+='<table><tbody><tr><th></th>'+''.join(['<th>'+str(n)+'</th>' for n in range(1,13)])+"<th>total</th><th>avg</th></tr>"
             highlights={'month':{},'year':{}}
+            data = {}
 
             # months with data buildup
             for m in ['balance','ratio','tgtr','music','daily music','tgtdm','learn','daily learn','tgtdl',
-                      'exercise','daily exercise','tgtde','bg','diy','vg','total','entries','titles']:
+                      'exercise','daily exercise','tgtde','bg','diy','vg','total','dailies total','tgtto',
+                      'entries','titles']:
                 # row title
                 bal+="<tr>"
                 if m=='entries':
@@ -322,7 +324,7 @@ class PTimeDb():
                 bal+="<td><b>"+m+"</b></td>"
 
                 ts=[]
-                for ym in ymonths:
+                for nym,ym in enumerate(ymonths):
                     mus=music.get(ym,0)
                     lea=learning.get(ym,0)
                     exe=exercise.get(ym,0)
@@ -368,14 +370,18 @@ class PTimeDb():
                         ts.append(diy)
                     elif m=='vg':
                         ts.append(vid)
+                    elif m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde':
+                        ts.append(rules[ym][ruleabbs[m]])
                     elif m=='total':
                         ts.append(tot)
+                    elif m=='dailies total':
+                        ts.append(data['daily music'][nym] + data['daily learn'][nym] + data['daily exercise'][nym])
+                    elif m=='tgtto':
+                        ts.append(data['tgtdm'][nym] + data['tgtdl'][nym] + data['tgtde'][nym])
                     elif m=='entries':
                         ts.append(entries.get(ym,0))
                     elif m=='titles':
                         ts.append(titles.get(ym,0))
-                    elif m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde':
-                        ts.append(rules[ym][ruleabbs[m]])
                     else:
                         pass
 
@@ -410,26 +416,9 @@ class PTimeDb():
                         rr=0
                     ts.append(rr)
                     highlights['year'][m]=ts[-1]
-                elif m=='daily music':
-                    if bal_year=='this year':
-                        ts.append(sum([music.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
-                    else:
-                        ts.append(sum([music.get(ym,0) for ym in ymonths])/365)
-                elif m=='daily learn':
-                    if bal_year=='this year':
-                        ts.append(sum([learning.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
-                    else:
-                        ts.append(sum([learning.get(ym,0) for ym in ymonths])/365)
-                elif m=='daily exercise':
-                    if bal_year=='this year':
-                        ts.append(sum([exercise.get(ym,0) for ym in ymonths])/datetime.datetime.now().timetuple().tm_yday)
-                    else:
-                        ts.append(sum([exercise.get(ym,0) for ym in ymonths])/365)
-                elif m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde':
-                    if bal_year=='this year':
-                        ts.append(sum([rules[ym][ruleabbs[m]] for ym in ymonths])/datetime.datetime.now().month)
-                    else:
-                        ts.append(sum([rules[ym][ruleabbs[m]] for ym in ymonths])/12)
+                elif m=='daily music'or m=='daily learn' or m=='daily exercise' or m=='dailies total' or \
+                     m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde' or m=='tgtto':
+                    ts.append(0)
                 else:
                     ts.append(ctot)
                     if m=='balance':
@@ -439,7 +428,10 @@ class PTimeDb():
                 # month cells
                 for nn,t in enumerate(ts):
                     bal+='<td align="right"'
-                    if (m=='balance' and t<0) or (m=='ratio' and t<rul_tgtr[nn] and t>0) or \
+                    if (m=='daily music'or m=='daily learn' or m=='daily exercise' or m=='dailies total' or \
+                       m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde' or m=='tgtto') and nn==12:
+                        pass
+                    elif (m=='balance' and t<0) or (m=='ratio' and t<rul_tgtr[nn] and t>0) or \
                        (m=='daily music' and t<rul_tgtdm[nn]) or \
                        (m=='daily learn' and t<rul_tgtdl[nn]) or \
                        (m=='daily exercise' and t<rul_tgtde[nn]):
@@ -449,9 +441,9 @@ class PTimeDb():
                          (m=='daily learn' and t>=rul_tgtdl[nn]) or \
                          (m=='daily exercise' and t>=rul_tgtde[nn]):
                         bal+=' style="background:lightgreen;"'
-                    elif (m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde') and nn<12 and t!=0 and t>cavg:
+                    elif (m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde' or m=='tgtto') and nn<12 and t!=0 and t>cavg:
                         bal+=' style="background:yellow;"'
-                    elif m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde':
+                    elif m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde' or m=='tgtto':
                         bal+=' style="background:lightyellow;"'
                     elif ctot==0:
                         pass
@@ -462,13 +454,16 @@ class PTimeDb():
                         bal+="{0:.2f}".format(t)
                     elif (m=='entries' or m=='titles') and t>0:
                         bal+=str(int(t))
-                    elif ((m=='daily music' or m=='daily learn' or m=='daily exercise') and t>0) or \
-                         ((m=='tgtdm' or m=='tgtdl' or m=='tgtde') and ((bal_year == 'this year' and nn<datetime.datetime.now().month) or bal_year == 'last year')):
+                    elif ((m=='daily music' or m=='daily learn' or m=='daily exercise' or m=='dailies total') and t>0) or \
+                         ((m=='tgtdm' or m=='tgtdl' or m=='tgtde' or m=='tgtto') and \
+                          ((bal_year == 'this year' and nn<datetime.datetime.now().month) or bal_year == 'last year') and \
+                          nn != 12):
                         bal+=str(int(t))+'m'
                     elif t!=0:
                         bal+=self._value(t,sep='<br>')
                     bal+="</td>"
                 bal+='</tr>'
+                data[m] = ts[::]
             bal+='</tbody></table>'
 
             if bal_year == 'this year':
