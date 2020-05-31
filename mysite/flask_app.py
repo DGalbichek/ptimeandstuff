@@ -353,8 +353,8 @@ def platspage():
         
     strongestmonth.sort(key=lambda x: x[1], reverse=True)
     strongestmonth=[(n+1,x[0],str(int(x[1]/60))+'h '+str(x[1]%60)+'m',x[2]) for n,x in enumerate(strongestmonth)]
-    platsmonths = [{'plat':x[1],'data':platsmonths[x[1]], 'mpt':pmpts[x[1]]} for x in strongestmonth]
     alltimeplats=ptdb.getCachedData('alltime-platforms',[],singl=True)
+    platsmonths = [{'plat':x['name'],'data':platsmonths[x['name']], 'mpt':pmpts[x['name']]} for x in alltimeplats['content']]
 
     ptdb.db.close()
     return render_template('ptimeplats.html',
