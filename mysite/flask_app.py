@@ -191,13 +191,13 @@ def ptimepage():
     curryearmonth=calendar.month_name[int(ym[-2:])]+' '+curryear
 
     if getfromcache:
-        l2=ptdb.getCachedData('monthly-games-'+ym,[],singl=True)
-        l4=ptdb.getCachedData('monthly-platforms-'+ym,[],singl=True)
-        l1=ptdb.getCachedData('yearly-games-'+curryear,[],singl=True)
-        l3=ptdb.getCachedData('yearly-platforms-'+curryear,[],singl=True)
-        l5=ptdb.getCachedData('alltime-games',[],singl=True)
-        l6=ptdb.getCachedData('alltime-platforms',[],singl=True)
-        l7=ptdb.getCachedData('alltime-impressions',[],singl=True)
+        l2=ptdb.getCachedData('monthly-games-'+ym,{'content':[]},singl=True)
+        l4=ptdb.getCachedData('monthly-platforms-'+ym,{'content':[]},singl=True)
+        l1=ptdb.getCachedData('yearly-games-'+curryear,{'content':[]},singl=True)
+        l3=ptdb.getCachedData('yearly-platforms-'+curryear,{'content':[]},singl=True)
+        l5=ptdb.getCachedData('alltime-games',{'content':[]},singl=True)
+        l6=ptdb.getCachedData('alltime-platforms',{'content':[]},singl=True)
+        l7=ptdb.getCachedData('alltime-impressions',{'content':[]},singl=True)
 
     else:
         l2=ptdb.top(what2={'ym':ym,'gameperplatform':''})
