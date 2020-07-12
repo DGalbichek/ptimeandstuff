@@ -561,7 +561,7 @@ class PTimeDb():
         if not is_cumm:
             if start>end:
                 return {'error':'Start comes after end?'}
-            l=self.list('playtime',{'game':game})
+            l=self.list('playtime',{'game': game, 'platform': platform})
             if [x for x in l if (start<=datetime.datetime.strptime(x[3][:10],'%Y-%m-%d') and datetime.datetime.strptime(x[3][:10],'%Y-%m-%d')<=end) or (start<=datetime.datetime.strptime(x[4][:10],'%Y-%m-%d') and datetime.datetime.strptime(x[4][:10],'%Y-%m-%d')<=end)]:
                 return {'error':'Collides with previous entry.'}
         if is_cumm or start.month==end.month:
