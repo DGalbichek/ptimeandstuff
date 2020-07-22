@@ -2,6 +2,7 @@
 
 {% block ptimecontent %}
 
+{% if form %}
   <form action="" method="post" name="enterdata">
       {{ form.hidden_tag() }}
 
@@ -22,6 +23,7 @@
 	</table>
   </form>
 <hr>
+{% endif %}
 
 	{% for t in tops %}
 		<p class="medium">{{ t.title }}</p>
@@ -40,8 +42,9 @@
 		<br>
 	{% endfor %}
 
-
 <hr>
+
+{% if form %}
 <p class="medium">Monthly hours:</p>
 <div>
     {% autoescape false %}
@@ -61,7 +64,7 @@
     {% endautoescape %}
 </div>
 <hr>
-
+{% endif %}
 
 
 {% endblock %}

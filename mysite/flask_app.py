@@ -197,7 +197,6 @@ def ptimepage():
         l3=ptdb.getCachedData('yearly-platforms-'+curryear,{'content':[]},singl=True)
         l5=ptdb.getCachedData('alltime-games',{'content':[]},singl=True)
         l6=ptdb.getCachedData('alltime-platforms',{'content':[]},singl=True)
-        l7=ptdb.getCachedData('alltime-impressions',{'content':[]},singl=True)
 
     else:
         l2=ptdb.top(what2={'ym':ym,'gameperplatform':''})
@@ -218,7 +217,7 @@ def ptimepage():
         l6=m(20,ptdb.top(what='platform',what2={}),False)
         l6=ptdb.setCachedData('alltime-platforms',l6)
 
-        l7=m(30,ptdb.top(what2={'impressions':''}),False)
+        l7=m(100,ptdb.top(what2={'impressions':''}),False)
         l7=ptdb.setCachedData('alltime-impressions',l7)
 
     l1['content']=m(20,l1['content'])
@@ -236,7 +235,6 @@ def ptimepage():
         {'title': str(len(l4['content']))+' platforms in '+curryearmonth, 'list': l4},
         {'title': 'Top '+str(len(l1['content'])-1)+' games in '+curryear, 'list': l1},
         {'title': 'Top '+str(len(l3['content']))+' platforms in '+curryear, 'list': l3},
-        {'title': 'Top '+str(len(l7['content']))+' impressions of all time (well, 2017-)', 'list': l7},
         {'title': 'Top '+str(len(l5['content'])-1)+' games of all time (well, 2017-)', 'list': l5},
         {'title': 'Top '+str(len(l6['content']))+' platforms of all time (well, 2017-)', 'list': l6},
         ]
@@ -248,6 +246,24 @@ def ptimepage():
                            mpt=mpt,
                            mec=mec,
                            mtc=mtc,
+                           tops=tops
+                           )
+
+
+@app.route("/ptime/imps", methods=['GET', 'POST'])
+@app.route("/ptime/imps/", methods=['GET', 'POST'])
+def impspage():
+    ptdb=ptimedb.PTimeDb()
+
+    l7=ptdb.getCachedData('alltime-impressions',{'content':[]},singl=True)
+
+    tops=[
+        {'title': 'Top '+str(len(l7['content']))+' impressions of all time (well, 2017-)', 'list': l7},
+        ]
+
+    ptdb.db.close()
+    return render_template('ptime.html',
+                           title='impressions',
                            tops=tops
                            )
 
