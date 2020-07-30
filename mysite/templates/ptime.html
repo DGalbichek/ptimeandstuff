@@ -38,7 +38,7 @@
 			</tr>
 		{% endfor %}
 		</table>
-		<div style="float:center"><i>(cached on {{t.list.setCacheDate}})</i></div>
+		{% if t.list.setCacheDate %}<div style="float:center"><i>(cached on {{t.list.setCacheDate}})</i></div>{% endif %}
 		<br>
 	{% endfor %}
 

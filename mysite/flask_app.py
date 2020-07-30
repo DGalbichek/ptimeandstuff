@@ -256,8 +256,17 @@ def impspage():
     ptdb=ptimedb.PTimeDb()
 
     l7=ptdb.getCachedData('alltime-impressions',{'content':[]},singl=True)
+    bigrunners = {}
+    for imp in l7['content']:
+        if imp['name'] in bigrunners:
+            bigrunners[imp['name']] += 1
+        else:
+            bigrunners[imp['name']] = 1
+    bigrunners = [{'name': x, 'time': bigrunners[x]} for x in bigrunners]
+    bigrunners.sort(key=lambda x: x['time'], reverse=True)
 
     tops=[
+        {'title': 'Big runners', 'list': {'content': bigrunners}},
         {'title': 'Top '+str(len(l7['content']))+' impressions of all time (well, 2017-)', 'list': l7},
         ]
 
