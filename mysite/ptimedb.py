@@ -10,8 +10,8 @@ import sqlite3
 WHAT = {'game':'games','platform':'platforms','tag':'tags'}
 BALANCERATIOTARGET = 0.5
 DAILYMUSICTARGET = 30
-DAILYLEARNTARGET = 15
-DAILYEXERCISETARGET = 15
+DAILYLEARNTARGET = 10
+DAILYEXERCISETARGET = 20
 
 
 class PTimeDb():
@@ -431,10 +431,10 @@ class PTimeDb():
                     if (m=='daily music'or m=='daily learn' or m=='daily exercise' or m=='dailies total' or \
                        m=='tgtr' or m=='tgtdm' or m=='tgtdl' or m=='tgtde' or m=='tgtto') and nn==12:
                         pass
-                    elif (m=='balance' and t<0) or (m=='ratio' and t<rul_tgtr[nn] and t>0) or \
-                       (m=='daily music' and t<rul_tgtdm[nn]) or \
-                       (m=='daily learn' and t<rul_tgtdl[nn]) or \
-                       (m=='daily exercise' and t<rul_tgtde[nn]):
+                    elif (m=='balance' and t<0 and nn==12) or \
+                         (m=='daily music' and t<rul_tgtdm[nn]) or \
+                         (m=='daily learn' and t<rul_tgtdl[nn]) or \
+                         (m=='daily exercise' and t<rul_tgtde[nn]):
                         bal+=' style="background:red;"'
                     elif (m=='balance' and t>0) or (m=='ratio' and t>=rul_tgtr[nn]) or \
                          (m=='daily music' and t>=rul_tgtdm[nn]) or \
@@ -447,7 +447,7 @@ class PTimeDb():
                         bal+=' style="background:lightyellow;"'
                     elif ctot==0:
                         pass
-                    elif nn<12 and t!=0 and t>=cavg:
+                    elif nn<12 and t!=0 and t>=cavg and m!='balance' and m!='ratio':
                         bal+=' style="background:lightblue;"'
                     bal+='>'
                     if (m=='ratio' or m=='tgtr') and t>0:
@@ -468,7 +468,7 @@ class PTimeDb():
 
             if bal_year == 'this year':
                 thismonth=datetime.datetime.now().strftime('%Y-%m')
-                high='<h1>curr month: <font style="background:'
+                '''high='<h1>curr month: <font style="background:'
                 high+='red' if highlights['month']['ratio']<rules[thismonth]['BALANCERATIOTARGET'] else 'lightgreen'
                 high+=';">'+self._value(highlights['month']['balance'], sep=' ')
                 high+=' ('+"{0:.2f}".format(highlights['month']['ratio'])+')</font>'
@@ -478,10 +478,11 @@ class PTimeDb():
                     if 'rank' in highlights['month']:
                         high+=highlights['month']['rank']
                     high+='</font>'
-                high+='</h1><h1>this year: <font style="background:'
-                high+='red' if highlights['year']['ratio']<rul_tgtr[-1] else 'lightgreen'
-                high+=';">'+self._value(highlights['year']['balance'], sep=' ')
-                high+=' ('+"{0:.2f}".format(highlights['year']['ratio'])+')</font></h1>'
+                high+='</h1>'''
+                high='<h1>this year: <font style="background:'
+                high+='red' if highlights['year']['balance']<0 else 'lightgreen'
+                high+=';">'+self._value(highlights['year']['balance'], sep=' ')+'</font>'
+                high+=' ('+"{0:.2f}".format(highlights['year']['ratio'])+')</h1>'
                 mostrecentrules = self.getRules(thismonth)
                 high+='<hr><p>rules since: '+mostrecentrules['ym']+'</p>'
                 high+='<h1>target ratio: '+"{0:.2f}".format(mostrecentrules['BALANCERATIOTARGET'])+'</h1>'
