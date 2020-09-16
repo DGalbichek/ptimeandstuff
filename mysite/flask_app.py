@@ -405,12 +405,16 @@ def ptime_formadd(msg=[]):
         if d==cd:
             ptdb=ptimedb.PTimeDb()
             m=ptdb.addPTime(form.game.data,form.platform.data,d,d,form.ptime.data)
-            ptdb.db.close()
             if 'duna' in m:
-                msg="""<p class="larger">"""+m['duna']+"""</p><br><a href="/ptime/add">+</a>"""
+                msg="""<h2>"""+m['duna']+"""</h2>"""
+                for pt in [x for x in ptdb.list('playtime')][:10]:
+                    msg += '<p class="larger">' + pt[3][:10] + ' - ' + str(pt[-2]) + ' added for '
+                    msg += ptdb.nameof('game',pt[1]) + ' (' + ptdb.nameof('platform',pt[2]) + ')</p>'
+                msg += """<h1><a href="/ptime/add">+</a></h1>"""
                 return msg
             else:
                 msg=[m['error'],]
+            ptdb.db.close()
         else:
             msg=['Dates don\'t seem to match.',]
     else:
