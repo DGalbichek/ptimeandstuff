@@ -771,7 +771,7 @@ class PTimeDb():
             ta=self.tagged_as(x[0])
             for t in ta:
                 if ta[t]:
-                    #print(', '.join([ptdb.nameof(t,ti) for ti in ta[t]]), end='; ')
+                    print(', '.join([self.nameof(t,ti) for ti in ta[t]]), end='; ')
                     taim=[(self.nameof(t,ti),self.list('playtime',what2={t:ti,})) for ti in ta[t]]
                     titles=[]
                     tot=0

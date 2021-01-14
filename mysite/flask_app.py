@@ -211,7 +211,7 @@ def ptimepage():
         l3=ptdb.top(what='platform',what2={'y':curryear})
         l3=ptdb.setCachedData('yearly-platforms-'+curryear,l3)
 
-        l5=m(40,ptdb.top(what2={}))
+        l5=m(50,ptdb.top(what2={}))
         l5=ptdb.setCachedData('alltime-games',l5)
 
         l6=m(20,ptdb.top(what='platform',what2={}),False)
@@ -264,6 +264,7 @@ def impspage():
             bigrunners[imp['name']] = 1
     bigrunners = [{'name': x, 'time': bigrunners[x]} for x in bigrunners]
     bigrunners.sort(key=lambda x: x['time'], reverse=True)
+    bigrunners = [x for x in bigrunners if x['time']!=1]
 
     tops=[
         {'title': 'Big runners', 'list': {'content': bigrunners}},
