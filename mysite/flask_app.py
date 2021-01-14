@@ -349,7 +349,7 @@ def no1spage():
                         })            
             bigrunners = [(x, bigrunners[x]) for x in bigrunners]
             bigrunners.sort(key=lambda x: x[1], reverse=True)
-            bigrunners = [x for x in bigrunners if x['time']!=1]
+            bigrunners = [x for x in bigrunners if x[1]!=1]
             no1data[what][when] = {
                 'no1s': no1s,
                 'bigrunners': bigrunners
