@@ -413,6 +413,7 @@ def ptime_formadd(msg=[]):
                     msg += '<p class="larger">' + pt[3][:10] + ' - ' + str(pt[-2]) + ' added for '
                     msg += ptdb.nameof('game',pt[1]) + ' (' + ptdb.nameof('platform',pt[2]) + ')</p>'
                 msg += """<h1><a href="/ptime/add">+</a></h1>"""
+                msg += """<br><br><h1><a href="/ptime/balance">BAL</a></h1>"""
                 return msg
             else:
                 msg=[m['error'],]
@@ -469,6 +470,8 @@ def ptime_jsonadd():
 def ptimeinfopage():
     ptdb=ptimedb.PTimeDb()
     pt=[x[:-1] for x in ptdb.list('playtime')]
+    
+    pt = [(x[6], ptdb.nameof('game',x[1]), ptdb.nameof('platform',x[2]), x[3], x[4], x[5]) for x in pt]
     ptc=ptdb.list('playtime', what2={'aggr':'none', 'count':''})
     games=[(x[2],x[0]) for x in ptdb.list('game')]
     platforms=[(x[2],x[0]) for x in ptdb.list('platform')]
