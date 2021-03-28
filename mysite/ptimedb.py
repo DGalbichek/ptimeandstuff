@@ -334,15 +334,15 @@ class PTimeDb():
                     vid=tot-mus-lea-exe-boa-diy
 
                     if m=='balance':
-                        ts.append((mus+lea+exe)/rules[ym]['BALANCERATIOTARGET']-vid)
+                        ts.append((mus+lea+exe+diy)/rules[ym]['BALANCERATIOTARGET']-vid)
                     elif m=='ratio':
                         if vid==0:
-                            if mus+lea+exe > 0:
+                            if mus+lea+exe+diy > 0:
                                 ts.append(2)
                             else:
                                 ts.append(0)
                         else:
-                            ts.append((mus+lea+exe)/vid)
+                            ts.append((mus+lea+exe+diy)/vid)
                     elif m=='music':
                         ts.append(mus)
                     elif m=='daily music':
