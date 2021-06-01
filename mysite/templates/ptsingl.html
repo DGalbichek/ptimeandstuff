@@ -1,5 +1,25 @@
 {% extends "ptimebase.html" %}
 
+{% block head %}
+	<link rel="stylesheet" href="/static/jquery-ui.css">
+	<script src="/static/jquery-1.12.4.js"></script>
+	<script src="/static/jquery-ui.js"></script>
+
+	<script>
+		$(document).ready(
+			function(){
+				$.ajax({
+					url: '{{ url_for("autocomplete") }}'
+					}).done(function (data) {
+						$('#game_autocomplete').autocomplete({
+							source: data,
+							minLength: 2
+						});
+					});
+				});
+	</script>
+{% endblock %}
+
 {% block ptimecontent %}
 
 
@@ -8,7 +28,7 @@
 
       <table>
 	<tr>
-	  <td align="left">{{ form.game(size=1, class='medium') }}<br>
+	  <td align="left">{{ form.game(size=16, class='medium') }}<br>
 	  {% for error in form.game.errors %}
             <span style="color: red;">[{{ error }}]</span>
           {% endfor %}

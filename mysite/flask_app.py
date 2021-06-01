@@ -81,7 +81,8 @@ class PTarchiveForm(FlaskForm):
     ym=SelectField('Ym',coerce=str, validators=[DataRequired()])
 
 class PTsForm(FlaskForm):
-    game=SelectField('Game',coerce=int, validators=[DataRequired()])
+    game=StringField('Game', id='game_autocomplete', validators=[DataRequired()])
+    #game=SelectField('Game',coerce=int, validators=[DataRequired()])
 
 class PPPForm(FlaskForm):
     setid = StringField('setid', validators=[DataRequired()])
@@ -507,7 +508,7 @@ def ptimesinglpage(msg=[]):
     stats={}
 
     if form.validate_on_submit():
-        gamename = dict(form.game.choices).get(form.game.data)
+        gamename = form.game.data
         ptdb=ptimedb.PTimeDb()
         mtaim=ptdb.list('playtime',what2={'game':form.game.data,'aggr':'monthly'})
         mpt=ptdb.monthly_table(mtaim)
