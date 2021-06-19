@@ -346,24 +346,24 @@ class PTimeDb():
                     elif m=='music':
                         ts.append(mus)
                     elif m=='daily music':
-                        if bal_year=='this year' and ym==ymonths[-1]:
-                            ts.append(mus/datetime.datetime.now().day)
-                        else:
-                            ts.append(mus/monthrange(int(ym[:4]),int(ym[-2:]))[1])
+                        #if bal_year=='this year' and ym==ymonths[-1]:
+                        #    ts.append(mus/datetime.datetime.now().day)
+                        #else:
+                        ts.append(mus/monthrange(int(ym[:4]),int(ym[-2:]))[1])
                     elif m=='learn':
                         ts.append(lea)
                     elif m=='daily learn':
-                        if bal_year=='this year' and ym==ymonths[-1]:
-                            ts.append(lea/datetime.datetime.now().day)
-                        else:
-                            ts.append(lea/monthrange(int(ym[:4]),int(ym[-2:]))[1])
+                        #if bal_year=='this year' and ym==ymonths[-1]:
+                        #    ts.append(lea/datetime.datetime.now().day)
+                        #else:
+                        ts.append(lea/monthrange(int(ym[:4]),int(ym[-2:]))[1])
                     elif m=='exercise':
                         ts.append(exe)
                     elif m=='daily exercise':
-                        if bal_year=='this year' and ym==ymonths[-1]:
-                            ts.append(exe/datetime.datetime.now().day)
-                        else:
-                            ts.append(exe/monthrange(int(ym[:4]),int(ym[-2:]))[1])
+                        #if bal_year=='this year' and ym==ymonths[-1]:
+                        #    ts.append(exe/datetime.datetime.now().day)
+                        #else:
+                        ts.append(exe/monthrange(int(ym[:4]),int(ym[-2:]))[1])
                     elif m=='bg':
                         ts.append(boa)
                     elif m=='diy':
